@@ -1,6 +1,6 @@
 init()
 
-x0_initial = [0 0];
+x0_initial = [0.5 0.3];
 x0 = x0_initial;
 
 u_max = .1;
@@ -14,7 +14,7 @@ DI = DoubleIntegrator();
 A_x = [0 1; 0 -1; 1 0; -1 0];
 b_x = [1; 1; 1; 1];
 
-order = 2*size(A,1)-1;
+order = 2*size(DI.A,1)-1;
 [H, D_nT] = Poly.getBezMatrices(order, dt);
 
 [A_dyn, b_dyn] = Poly.forwardReachable(H, DI.A, DI.B,A_x, b_x,u_max,D_nT,x0);

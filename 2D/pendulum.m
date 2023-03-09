@@ -39,7 +39,7 @@ clear x1 x2
 
 %%
 
-dt = 2;
+dt = 1;
 x0 = [0 0];
 u_max = 1;
 
@@ -58,7 +58,7 @@ N = [Lf*norm(g_xbar,2); norm(g_xbar,2)];
 M = projectOntoSemidefiniteCone(M_og);
 
 f = figure(1);
-f.Position = [0 0 650 650];
+% f.Position = [0 0 650 650];
 
 order = 3;
 [H, D_nT] = Poly.getBezMatrices(order, dt);
