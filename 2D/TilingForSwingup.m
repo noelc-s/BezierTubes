@@ -1,4 +1,4 @@
-
+addpath('..')
 plot_traj = false;
 earase_plots = false;
 
@@ -20,7 +20,7 @@ order = 2*size(A,1)-1;
 f = figure(1);
 clf;
 
-subplot(1,2,1)
+% subplot(1,2,1)
 hold on;
 bR = patch(0,0,'b','facealpha',0.1);
 fR = patch(0,0,'g','facealpha',0.1);
@@ -34,9 +34,7 @@ end
 
 axis([-1.1 1.1 -1.1 1.1])
 axis equal
-V_x = lcon2vert(A_x,b_x);
-ind_ux = convhull(V_x);
-V_x = V_x(ind_ux,:);
+V_x = Poly.conv(Poly.hyp2vert(A_x,b_x));
 patch(V_x(:,1),V_x(:,2),'k','facealpha',0.05,'linewidth',2);
 
 set(gca,'TickLabelInterpreter', 'latex');
@@ -55,6 +53,7 @@ ind_ = 1;
 G = G.addnode(numel(X));
 B_ = cell(numel(X),1);
 F_ = cell(numel(X),1);
+tic
 for i = 1:numel(X)
 
     x_center = [X(i) Y(i)];
@@ -119,13 +118,12 @@ t = [];
 w = [];
 for i = 1:G.numnodes
     F = F_{i};
+    i/G.numnodes
     for j = 1:G.numnodes
         B = B_{j};
         A_in = [F(:,1:end-1); B(:,1:end-1)];
         b_in = [F(:,end); B(:,end)];
-        objective=[0 0];
-        IN=struct('obj',objective,'A',A_in,'B',b_in);
-        OUT = cddmex('solve_lp',IN);
+        quadprog(
         if OUT.how==1
             Vert = Poly.hyp2vert(A_in, b_in);
             if size(Vert,1)>2
@@ -143,6 +141,7 @@ G = G.addedge(s,t,w);
 % start at the origin and end at a far eq. pt.
 start_n = floor(pos_density/2)*vel_density + floor(vel_density/2)+1;
 end_n = (pos_density-1)*vel_density+ floor(vel_density/2)+1;
+
 scatter(G.Nodes.x(start_n,1), G.Nodes.x(start_n,2), 50, 'g', 'filled')
 scatter(G.Nodes.x(end_n,1), G.Nodes.x(end_n,2), 50, 'b', 'filled')
 path = shortestpath(G,start_n, end_n);
@@ -163,7 +162,10 @@ for i = 1:size(x_nodes,1)-1
     P = [P pos(1:end-1)];
     V = [V vel(1:end-1)];
 end
-subplot(1,2,2); hold on;
+drawnow
+% end
+toc
+% subplot(1,2,2); hold on;
 set(gca,'TickLabelInterpreter', 'latex');
 set(gca,'FontSize',17)
 set(gca,'linewidth',2)

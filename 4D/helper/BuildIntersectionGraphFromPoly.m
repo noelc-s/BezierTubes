@@ -63,7 +63,7 @@ dual_G.Nodes.C = [0 0];
 for j = 1:size(G.Edges,1)
     dual_G = dual_G.addnode(1);
     dual_G.Nodes.P{end} = PolyInt{j};
-    V = lcon2vert(PolyInt{j}(:,1:end-1),PolyInt{j}(:,end)+0.01);
+    V = Poly.hyp2vert(PolyInt{j}(:,1:end-1),PolyInt{j}(:,end)+0.01);
     dual_G.Nodes.C(end,:) = mean(V);
 end
 dual_G = rmnode(dual_G,1);
@@ -81,7 +81,7 @@ end
 
 
 for i = 1:ind-1
-    V = lcon2vert(PolyInt{i}(:,1:end-1), PolyInt{i}(:,end)+0.01);
+    V = Poly.hyp2vert(PolyInt{i}(:,1:end-1), PolyInt{i}(:,end)+0.01);
     c_h = convhull(V);
     c_h = V(c_h,:);
     patch(c_h(:,1),c_h(:,2),'k','facealpha',0.1)

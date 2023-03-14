@@ -19,7 +19,7 @@ O{2} = 0.5*[-1 1; -1 -1; 1 -1; 1 1]'+[1; -1];
 O{3} = 0.5*[-1 1; -1 -1; 1 -1; 1 1]'+[0.5; 0.5];
 
 for i = 1:size(O,2)
-    [A_iris,b_iris] = vert2lcon(O{i}');
+    [A_iris,b_iris] = Poly.vert2hyp(O{i}');
     A_O{i} = A_iris;
     b_O{i} = b_iris;
 end
@@ -132,7 +132,7 @@ for t = 1:numel(X0)
 
     if add
         Polytopes{ind} = [A_dyn b_dyn];
-        V = lcon2vert(A_dyn,b_dyn);
+        V = Poly.hyp2vert(A_dyn,b_dyn);
         PolyCenter{ind} = mean(V);
         if ~isempty(V)
             c_h = convhull(V);
@@ -143,7 +143,7 @@ for t = 1:numel(X0)
             ind = ind+1;
             if ~overlap
                 O{size(O,2)+1} = V'; % add grown polytope to obstacle list
-                [A_dyn,b_dyn] = vert2lcon(O{size(O,2)}');
+                [A_dyn,b_dyn] = Poly.vert2hyp(O{size(O,2)}');
                 A_O{size(O,2)} = A_dyn;
                 b_O{size(O,2)} = b_dyn;
             end

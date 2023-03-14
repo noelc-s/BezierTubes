@@ -7,7 +7,7 @@ fprintf(fileID, "polyhedra = (\n");
 
 str = "";
 for i = 1:size(PolyInt,2)
-    V = lcon2vert(PolyInt{i}(:,1:end-1),PolyInt{i}(:,end)+buffer);
+    V = Poly.hyp2vert(PolyInt{i}(:,1:end-1),PolyInt{i}(:,end)+buffer);
     str1 = "Polyhedron.from_vertices((";
     for j = 1:size(V,1)
         str1 = append(str1,sprintf("[%i,%i],",V(j,1),V(j,2)));

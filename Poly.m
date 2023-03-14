@@ -7,7 +7,9 @@ classdef Poly
         end
 
         function [A,b] = vert2hyp(V)
-
+            H = cddmex('hull',struct('V',V));
+            A = H.A;
+            b = H.B;
         end
 
         function V = conv(V)

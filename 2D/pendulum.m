@@ -1,6 +1,7 @@
+init
 syms x1 x2 t
 x_sym = [x1 x2];
-f = [x2; sin(x1)];
+f = [x2; -sin(x1)];
 g = [0; 1];
 rng('default')
 
@@ -39,7 +40,7 @@ clear x1 x2
 
 %%
 
-dt = 2;
+dt = 1;
 x0 = [0 0];
 u_max = 1;
 
@@ -117,10 +118,14 @@ s_x = size(A_x,1);
 A_in = [A_u; A_x_];
 b_in = [b_u; b_x_];
 
-Vert = lcon2vert(A_in,b_in);
-ind = convhull(Vert);
-Vert = Vert(ind,:);
+Vert = Poly.conv(Poly.hyp2vert(A_in,b_in));
 patch(Vert(:,1),Vert(:,2),'b','facealpha',0.1);
+
+%%% Linear system
+[A_lin, b_lin] = Poly.forwardReachable(H, Df_func(x_bar(1),x_bar(2)),...
+    g_func(x_bar(1), x_bar(2)), A_x, b_x,u_max,D_nT,x0);
+Vert_lin = Poly.conv(Poly.hyp2vert(A_lin,b_lin));
+patch(Vert_lin(:,1),Vert_lin(:,2),'k','facealpha',0.1);
 
 %%% Plot interpolations of the edges
 % x1 = x0;

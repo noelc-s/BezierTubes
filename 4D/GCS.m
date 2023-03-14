@@ -1,5 +1,6 @@
 %% Search graph for path
 addpath('helper')
+addpath(genpath('~/mosek'))
 clear;clf;
 axis equal
 axis off
