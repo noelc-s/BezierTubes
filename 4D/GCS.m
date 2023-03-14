@@ -1,5 +1,6 @@
 %% Search graph for path
 addpath('helper')
+addpath('..')
 clear;clf;
 axis equal
 axis off
@@ -123,14 +124,24 @@ while i < length(P)
 end
 %%
 
+vel = [0 0];
+PATH = [];
 for i = 1:size(path,1)-1
 x0 = path(i,:);
 x1 = path(i+1,:);
 opts = optimset('Display','on');
 A_x = [Polytopes{Ptopes(i)}(:,1:end-1) zeros(size(Polytopes{Ptopes(i)},1),2)];
-b_x = Polytopes{Ptopes(i)}(:,end)+0.01;
-[t,FVAL,EXITFLAG] = fmincon(@(t) t, 1,[],[],[],[],[],[],@(t) con(t, order,A,B,u_max,A_x,b_x,x0,x1),opts)
-T(i) = t;
+b_x = Polytopes{Ptopes(i)}(:,end);
+% V = Poly.hyp2vert(A_x,b_x);
+% V = [[V(:,1:2) .1*ones(size(V,1),2)];[V(:,1:2) -.1*ones(size(V,1),2)]];
+% [A_x, b_x] =  Poly.vert2hyp(V);
+% A_x = A_x/norm(b_x);
+% b_x = b_x/norm(b_x)+0.01;
+% [t,FVAL,EXITFLAG] = fmincon(@(t) t(1), [1 0 0],[],[],[],[],[],[],@(t) con(t, order,A,B,u_max,A_x,b_x,x0,x1),opts)
+[t,FVAL,EXITFLAG] = fmincon(@(t) t(1), [1],[],[],[],[],[],[],@(t) con(t, order,A,B,u_max,A_x,b_x,x0,x1),opts)
+T(i) = t(1);
+vel = t(2:end);
+% PATH = [PATH; x0 x1 vel];
 end
 
 P = [];
@@ -165,7 +176,7 @@ end
 
 
 function [c, ceq] = con(t, order,A,B,u_max,A_x,b_x,x0,x1)
-[H, D_nT] = Poly.getBezMatrices(order, t);
+[H, D_nT] = Poly.getBezMatrices(order, t(1));
 H_0 = H^0; 
 H_1 = H^1;
 H_2 = H^2;
@@ -189,10 +200,7 @@ for m = 1:4
 end
 A_ = [A_u; A_x_];
 b_ = [b_u; b_x_];
-% zeta_1=D_nT*[x0(1); 0; x1(1); 0];
-% zeta_2=D_nT*[x0(2); 0; x1(2); 0];
-% zeta = reshape([zeta_1'; zeta_2'], [], 1);
 c = A_*[x0(1) x0(2) 0 0 x1(1) x1(2) 0 0]' - b_;
+% c = A_*[x0(1) x0(2) x0(3) x0(4) x1(1) x1(2) t(2) t(3)]' - b_;
 ceq = [];
-% ceq = inv(D_nT)*zeta - [x0'; x1'];
 end

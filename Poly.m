@@ -7,7 +7,9 @@ classdef Poly
         end
 
         function [A,b] = vert2hyp(V)
-
+            H = cddmex('hull',struct('V',V));
+            A = H.A;
+            b = H.B;
         end
 
         function V = conv(V)
@@ -84,10 +86,10 @@ classdef Poly
                     pBez = @(t) a*(1-t).^3 + 3*b*t.*(1-t).^2 + 3*c*t.^2.*(1-t) + d*t.^3;
                     vBez = @(t) (3*d*t.^2 - 3*c*t.^2 - 3*a*(t - 1).^2 + 3*b*(t - 1).^2 - 6*c*t.*(t - 1) + 3*b*t.*(2*t - 2))*1/dt;
                     
-%                     s = [s; scatter([a b c d], [a b c d]*H,30,col,'filled')];
+                    s = [s; scatter([a b c d], [a b c d]*H,30,col,'filled')];
                     pos = pBez(tau);
                     vel = vBez(tau);
-%                     s = [s; plot(pos, vel,'linewidth',1,'color',col)];
+                    s = [s; plot(pos, vel,'linewidth',1,'color',col)];
         end
         
         function [A_in, b_in] = backwardReachable(H, A, B,A_x, b_x,u_max,D_nT,x1)
