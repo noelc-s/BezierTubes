@@ -11,8 +11,8 @@ obstacle_number = 5;
 dt = 5;
 dt_short = 0.25;
 N = 2*ceil(dt/dt_short);
-u_max = .5;
-overlap = true;
+u_max = 1;
+overlap = false;
 
 A = [0 0 1 0; 0 0 0 1; 0 0 0 0; 0 0 0 0];
 B = [0 0; 0 0; 1 0; 0 1];
@@ -59,39 +59,42 @@ scatter(EC(1), EC(2),50,'g','filled')
 if status ~= 0
     error('Python errored')
 end
+%%
 gcs_optimized_path;
 % redo this
 
-% ord = [];
-% node = 0;
-% poly_num = SI;
-% for i = 1:size(edgeTraversal,1)
-%     ind = find(edgeTraversal(:,1)==node);
-%     ord = [ord ind];
-%     node = edgeTraversal(ind,2);
-% end
-% edgeTraversal = edgeTraversal(ord,1);
-% % path = path(ord,:);
-% path = unique(path,'rows');
-% path = [path; [EC EC]];
-% 
-% edgeTraversal = edgeTraversal-1;
-% edgeTraversal = edgeTraversal(2:end);
-% 
-% Ptopes = [G.Edges.EndNodes(edgeTraversal(1),1); G.Edges.EndNodes(edgeTraversal(1),2)];
-% node = G.Edges.EndNodes(edgeTraversal(1),2);
-% inds = 2:length(edgeTraversal);
-% for i = 1:length(edgeTraversal)
-%     row = find(sum(G.Edges.EndNodes(edgeTraversal(inds),:)==node,2));
-%     for j = 1:length(row)
-%     col(j) = find(G.Edges.EndNodes(edgeTraversal(inds(row(j))),:)==node);
-%     end
-%     node = G.Edges.EndNodes(edgeTraversal(inds(row)),mod(col,2)+1);
-%     tmp_inds = true(size(inds,2),1);
-%     tmp_inds(row) = 0;
-%     inds = inds(tmp_inds);
-%     Ptopes = [Ptopes; node];
-% end
+ord = [];
+node = 0;
+poly_num = SI;
+for i = 1:size(edgeTraversal,1)
+    ind = find(edgeTraversal(:,1)==node);
+    ord = [ord ind];
+    node = edgeTraversal(ind,2);
+end
+edgeTraversal = edgeTraversal(ord,1);
+% path = path(ord,:);
+path = unique(path,'rows');
+path = [path; [EC EC]];
+
+edgeTraversal = edgeTraversal-1;
+edgeTraversal = edgeTraversal(2:end);
+
+Ptopes = [G.Edges.EndNodes(edgeTraversal(1),1); G.Edges.EndNodes(edgeTraversal(1),2)];
+node = G.Edges.EndNodes(edgeTraversal(1),2);
+inds = 2:length(edgeTraversal);
+for i = 1:length(edgeTraversal)
+    row = find(sum(G.Edges.EndNodes(edgeTraversal(inds),:)==node,2));
+    for j = 1:length(row)
+    col(j) = find(G.Edges.EndNodes(edgeTraversal(inds(row(j))),:)==node);
+    end
+    node = G.Edges.EndNodes(edgeTraversal(inds(row)),mod(col,2)+1);
+    tmp_inds = true(size(inds,2),1);
+    tmp_inds(row) = 0;
+    inds = inds(tmp_inds);
+    Ptopes = [Ptopes; node];
+end
+% path = path([1 4 5 6 end],:);
+% Ptopes = [1 4 5 7 7];
 
 plot(path(:,1),path(:,2),'ko--')
 drawnow;

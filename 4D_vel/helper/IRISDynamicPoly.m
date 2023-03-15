@@ -60,34 +60,32 @@ axis equal
 
 Polytopes = {};
 PolyCenter = {};
-X0 = X0(:);
-Y0 = Y0(:);
-X0(end+1) = IC(1);
-Y0(end+1) = IC(2);
-X0(end+1) = EC(1);
-Y0(end+1) = EC(2);
+% X0 = X0(:);
+% Y0 = Y0(:);
+% X0(end+1) = IC(1);
+% Y0(end+1) = IC(2);
+% X0(end+1) = EC(1);
+% Y0(end+1) = EC(2);
 for t = 1:numel(X0)
     q0 = [X0(t) Y0(t) 0 0]';
     cont = true;
 
-    if t < numel(X0)-1
-        for j = 1:size(O,2)
-            if A_O{j}*q0 <= b_O{j}+0.01 % add some tolerance so if yo usample near boundary it doesn't stall
+    for j = 1:size(O,2)
+        if A_O{j}*q0 <= b_O{j}+0.01 % add some tolerance so if yo usample near boundary it doesn't stall
+            cont = false;
+            break;
+        end
+    end
+    if overlap
+        for p = Polytopes
+            if p{1}(:,1:end-1)*q0 <= p{1}(:,end)
                 cont = false;
                 break;
             end
         end
-        if overlap
-            for p = Polytopes
-                if p{1}(:,1:end-1)*q0 <= p{1}(:,end)
-                    cont = false;
-                    break;
-                end
-            end
-        end
-        if ~cont
-            continue
-        end
+    end
+    if ~cont
+        continue
     end
 
     stopping_tol = 1e-5;
@@ -102,19 +100,19 @@ for t = 1:numel(X0)
     b_ip1 = [];
 
     [A_dyn, b_dyn] = Poly.dynamicTube2D(H, A, B,A_x, b_x,u_max,D_nT);
-    
-%     [A_dyn_R, b_dyn_R] = Poly.backwardReachable2D(H, A, B,A_x, b_x,u_max,D_nT,[q0]');
 
-%     A_dyn = [A_dyn_F; A_dyn_R];
-%     b_dyn = [b_dyn_F; b_dyn_R];
+    %     [A_dyn_R, b_dyn_R] = Poly.backwardReachable2D(H, A, B,A_x, b_x,u_max,D_nT,[q0]');
+
+    %     A_dyn = [A_dyn_F; A_dyn_R];
+    %     b_dyn = [b_dyn_F; b_dyn_R];
 
 
     % Should not do forward and backward reachable, this is artificially
     % restrictive.
-    b_dyn_F = b_dyn - A_dyn(:,1:4)*q0; 
+    b_dyn_F = b_dyn - A_dyn(:,1:4)*q0;
     A_dyn_F = A_dyn(:,5:8);
 
-    b_dyn_R = b_dyn - A_dyn(:,5:8)*q0; 
+    b_dyn_R = b_dyn - A_dyn(:,5:8)*q0;
     A_dyn_R = A_dyn(:,1:4);
 
     A_dyn = [A_dyn_F; A_dyn_R];
