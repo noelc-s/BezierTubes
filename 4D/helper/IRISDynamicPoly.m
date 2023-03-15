@@ -121,7 +121,9 @@ for t = 1:numel(X0)
     for i = 1:length(Polytopes)
         if size(Polytopes{i},1) ~= 0
             nonzero_ind = ~(sum(Polytopes{i}(:,1:2)==0,2)==2);
-            if size([A_dyn b_dyn],1) == size(Polytopes{i},1) & norm([A_dyn(nonzero_ind,:)] - Polytopes{i}(nonzero_ind,1:2))<=1e-2
+            if size([A_dyn b_dyn],1) == size(Polytopes{i},1) &...
+                    norm([A_dyn(nonzero_ind,:)] - Polytopes{i}(nonzero_ind,1:2))<=1e-2 & ...
+                    norm([b_dyn(nonzero_ind,:)] - Polytopes{i}(nonzero_ind,end))<=1e-2
                 add = false;
                 break
             end
@@ -132,9 +134,9 @@ for t = 1:numel(X0)
 
     if add
         Polytopes{ind} = [A_dyn b_dyn];
-        V = Poly.hyp2vert(A_dyn,b_dyn);
+        V = Poly.hyp2vert(A_dyn,b_dyn)
         PolyCenter{ind} = mean(V);
-        if ~isempty(V)
+        if size(V,1)>2
             c_h = convhull(V);
             c_h = V(c_h,:);
             patch(c_h(:,1),c_h(:,2),'b','facealpha',0.01)
@@ -142,7 +144,7 @@ for t = 1:numel(X0)
             text(PolyCenter{ind}(1), PolyCenter{ind}(2)+0.1, string(ind));
             ind = ind+1;
             if ~overlap
-                O{size(O,2)+1} = V'; % add grown polytope to obstacle list
+                O{size(O,2)+1} = round(V,4)'; % add grown polytope to obstacle list
                 [A_dyn,b_dyn] = Poly.vert2hyp(O{size(O,2)}');
                 A_O{size(O,2)} = A_dyn;
                 b_O{size(O,2)} = b_dyn;

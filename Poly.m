@@ -31,9 +31,9 @@ classdef Poly
             H_0 = H^0;
             H_1 = H^1;
             H_2 = H^2;
-            z_0 = [1 0 0 0]';
-            z_T = [0 0 0 1]';
-            D = [1/(dt^0)*H_0*z_0 1/(dt^0)*H_1*z_0 1/(dt^0)*H_0*z_T 1/(dt^0)*H_1*z_T];
+            z_0 = [1 zeros(1,order)]';
+            z_T = [zeros(1,order) 1]';
+            D = [H_0*z_0 H_1*z_0 H_0*z_T H_1*z_T];
             D_nT = inv(D');
         end
 
@@ -75,7 +75,7 @@ classdef Poly
             end
         end
         
-        function [s, pos, vel]  = plotTraj(col,x0,x1,dt,H)
+        function [s, tau, pos, vel]  = plotTraj(col,x0,x1,dt,H)
             %%% Plot interpolations of the edges
             tau = linspace(0,1);
             s = [];
@@ -251,7 +251,7 @@ classdef Poly
             for m = 1:4
                 I_m = zeros(2,8);
                 I_m(1,(m-1)*2+1) = 1;
-                I_m(2,(m-1)*2+2) = 1;
+                I_m(2,(m-1)*2+2) = 1;V
                 A_tmp = [I_m*kron(H_0,eye(2))'; I_m*kron(H_1,eye(2))'];
                 A_lin = ([1 0 0 0; 0 1 0 0]*A*B)\([1 0 0 0; 0 1 0 0]*A*A*A_tmp - I_m*kron(H_2,eye(2))');
                 A_in = A_lin*kron(D_nT,eye(2));

@@ -155,10 +155,12 @@ for i = 1:size(x_nodes,1)-1
     b_in = [G.Nodes.F{path(i)}(:,end); G.Nodes.B{path(i+1)}(:,end)];
     Vert = Poly.conv(Poly.hyp2vert(A_in, b_in));
     int_pt = mean(Vert);
-    [~, pos, vel] = Poly.plotTraj('r',x_nodes(i,:),int_pt,dt,H);
+    [~, ~, pos, vel] = Poly.plotTraj('r',x_nodes(i,:),int_pt,dt,H);
+    plot(pos, vel,'linewidth',1,'color','r');
     P = [P pos(1:end-1)];
     V = [V vel(1:end-1)];
-    [~, pos, vel] = Poly.plotTraj('r',int_pt,x_nodes(i+1,:),dt,H);
+    [~, ~, pos, vel] = Poly.plotTraj('r',int_pt,x_nodes(i+1,:),dt,H);
+    plot(pos, vel,'linewidth',1,'color','r');
     P = [P pos(1:end-1)];
     V = [V vel(1:end-1)];
 end

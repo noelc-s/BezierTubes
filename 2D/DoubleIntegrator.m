@@ -1,4 +1,10 @@
-classdef DoubleIntegrator < LinearSystem
+classdef DoubleIntegrator
+
+
+    properties
+        A;
+        B;
+    end
 
 methods
     function obj = DoubleIntegrator()
