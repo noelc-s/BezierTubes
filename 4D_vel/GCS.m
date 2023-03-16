@@ -55,10 +55,10 @@ scatter(IC(1), IC(2),50,'r','filled')
 scatter(EC(1), EC(2),50,'g','filled')
 
 %%
-[status,cmdout] = system('source /home/amber/env/bin/activate; python3 helper/GraphConvexSets.py');
-if status ~= 0
-    error('Python errored')
-end
+% [status,cmdout] = system('source /home/amber/env/bin/activate; python3 helper/GraphConvexSets.py');
+% if status ~= 0
+%     error('Python errored')
+% end
 %%
 gcs_optimized_path;
 % redo this
@@ -102,13 +102,15 @@ drawnow;
 %%
 
 P = [];
+CP = [];
 Time = 0;
 for i = 1:size(path,1)-1
-[~, tau, pos_1, vel_1] = Poly.plotTraj('r',[path(i,1) path(i,3)],[path(i+1,1) path(i+1,3)],dt,H);
-[~, ~, pos_2, vel_2] = Poly.plotTraj('r',[path(i,2) path(i,4)],[path(i+1,2) path(i+1,4)],dt,H);
+[~, tau, pos_1, vel_1,cp1] = Poly.plotTraj('r',[path(i,1) path(i,3)],[path(i+1,1) path(i+1,3)],dt,H);
+[~, ~, pos_2, vel_2,cp2] = Poly.plotTraj('r',[path(i,2) path(i,4)],[path(i+1,2) path(i+1,4)],dt,H);
 P = [P;pos_1' pos_2'];
 tau = tau*dt;
 Time = [Time; tau'+Time(end)];
+CP = [CP [cp1(1,:); cp2(1,:)]];
 end
 Time = Time(2:end);
 [~,ind] = unique(Time);
@@ -139,19 +141,21 @@ x1 = path(i+1,1:4);
 opts = optimset('Display','on');
 A_x = Polytopes{Ptopes(i)}(:,1:end-1);
 b_x = Polytopes{Ptopes(i)}(:,end);
-[t,FVAL,EXITFLAG] = fmincon(@(t) t(1), [1],[],[],[],[],[],[],@(t) con(t, order,A,B,u_max,A_x,b_x,x0,x1),opts)
+[t,FVAL,EXITFLAG] = fmincon(@(t) t(1), dt,[],[],[],[],[],[],@(t) con(t, order,A,B,u_max,A_x,b_x,x0,x1),opts)
 T(i) = t(1);
 vel = t(2:end);
 end
 
 P = [];
+CP = [];
 Time = 0;
 for i = 1:size(path,1)-1
-[~, tau, pos_1, vel_1] = Poly.plotTraj('r',[path(i,1) path(i,3)],[path(i+1,1) path(i+1,3)],T(i),H);
-[~, ~, pos_2, vel_2] = Poly.plotTraj('r',[path(i,2) path(i,4)],[path(i+1,2) path(i+1,4)],T(i),H);
+[~, tau, pos_1, vel_1,cp1] = Poly.plotTraj('r',[path(i,1) path(i,3)],[path(i+1,1) path(i+1,3)],T(i),H);
+[~, ~, pos_2, vel_2,cp2] = Poly.plotTraj('r',[path(i,2) path(i,4)],[path(i+1,2) path(i+1,4)],T(i),H);
 P = [P;pos_1' pos_2'];
 tau = tau*T(i);
 Time = [Time;tau'+Time(end)];
+CP = [CP [cp1(1,:); cp2(1,:)]];
 end
 
 Time = Time(2:end);
@@ -162,6 +166,9 @@ P = P(ind,:);
 new_time = linspace(Time(1),Time(end),1000);
 P = interp1(Time,P,new_time);
 Time = new_time;
+
+plot(P(:,1),P(:,2),'b')
+scatter(CP(1,:),CP(2,:),50,'b','filled')
 
 s = scatter(0,0,300,'b','filled');
 tic

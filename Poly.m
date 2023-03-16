@@ -75,7 +75,7 @@ classdef Poly
             end
         end
         
-        function [s, tau, pos, vel]  = plotTraj(col,x0,x1,dt,H)
+        function [s, tau, pos, vel,cp]  = plotTraj(col,x0,x1,dt,H)
             %%% Plot interpolations of the edges
             tau = linspace(0,1);
             s = [];
@@ -90,6 +90,7 @@ classdef Poly
                     pos = pBez(tau);
                     vel = vBez(tau);
 %                     s = [s; plot(pos, vel,'linewidth',1,'color',col)];
+                cp = [[a b c d]; [a b c d]*H];
         end
         
         function [A_in, b_in] = backwardReachable(H, A, B,A_x, b_x,u_max,D_nT,x1)
