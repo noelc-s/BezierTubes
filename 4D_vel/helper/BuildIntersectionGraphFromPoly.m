@@ -96,7 +96,7 @@ V = lcon2vert(PolyInt{i}(:,1:end-1), PolyInt{i}(:,end));
     end
     c_h = convhull(V(:,1:2));
     c_h = V(c_h,:);
-    patch(c_h(:,1),c_h(:,2),'k','facealpha',0.1)
+    patch(c_h(:,1),c_h(:,2),'k','facealpha',0.01)
     %     scatter(dual_G.Nodes.C(i,1), dual_G.Nodes.C(i,2), 100,'r','filled')
     %     line([V(1,1) V(2,1)],[V(1,2) V(2,2)],'b','facealpha',0.05)
 end
