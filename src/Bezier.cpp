@@ -111,6 +111,14 @@ matrix_t Bezier::B(scalar_t t, matrix_t xi) {
   return B;
 }
 
+matrix_t Bezier::B(vector_t t, matrix_t xi) {
+  matrix_t B(t.size(),gamma*xi.cols());
+  for (int i = 0; i < gamma; i++) {
+    B.block(0,i*xi.cols(),t.size(),xi.cols()) << db(t, i, xi);
+  }
+  return B;
+}
+
 matrix_t Bezier::b(vector_t t, matrix_t xi) {
   return T(t)*M*xi;
 }
@@ -123,4 +131,83 @@ matrix_t Bezier::db(scalar_t t, int p, matrix_t xi) {
 matrix_t Bezier::db(vector_t t, int p, matrix_t xi) {
   Eigen::MatrixPower<matrix_t> Hpow(H);
   return T(t)*M*Hpow(p).transpose()*xi;
+}
+
+matrix_t Bezier::F(matrix_t A, vector_t b) {
+  
+}
+
+void Bezier::mix_constraints(Eigen::Ref<matrix_t> A_mix, Eigen::Ref<vector_t> b_mix, vector_t c, vector_t x_bar, vector_t f_xbar) {
+int n = 2;
+int m = 1;
+
+matrix_t A(n,n);
+matrix_t B(m,n);
+
+A.setZero();
+A.block(m,0,n-m,n-m).setIdentity();
+B.setZero();
+B.block(0,n-m,m,m).setIdentity();
+
+for (int i = 0; i < n; i++) {
+  for (int j = 0; j < m; j++) {
+    A_mix.block(4*i*m+j,0,4,n) << c(0)*A.block(i,0,1,n) + c(1)*B.block(j,0,1,n),
+                            c(0)*A.block(i,0,1,n) - c(1)*B.block(j,0,1,n),
+                            -c(0)*A.block(i,0,1,n) + c(1)*B.block(j,0,1,n),
+                            -c(0)*A.block(i,0,1,n) - c(1)*B.block(j,0,1,n);
+    b_mix.segment(4*i*m+j,4) << 1  +c(0)*x_bar(i) + c(1)*f_xbar(j),
+                                1  +c(0)*x_bar(i) - c(1)*f_xbar(j),
+                                1  -c(0)*x_bar(i) + c(1)*f_xbar(j),
+                                1  -c(0)*x_bar(i) - c(1)*f_xbar(j);
+  }
+}
+}
+
+void Bezier::Pi_SD(matrix_t &A) {
+   Eigen::SelfAdjointEigenSolver<matrix_t> eigensolver(A);
+   vector_t eval;
+   matrix_t evec;
+   eval = eigensolver.eigenvalues();
+   evec = eigensolver.eigenvectors();
+   A.setZero();
+   for (int i = 0; i < eval.size(); i++) {
+       if (eval(i) >= 0)
+         A += eval(i)*evec.block(0,i,eval.size(),1)*evec.block(0,i,eval.size(),1).transpose();
+   }
+}
+
+void Bezier::input_constraints(Eigen::Ref<matrix_t> A_u, Eigen::Ref<vector_t> b_u, vector_t c, vector_t x_bar, vector_t f_xbar) {
+  Eigen::MatrixPower<matrix_t> Hpow(H);
+  vector_t I_m(4);
+  matrix_t A_tmp(2,4);
+  matrix_t A(8,2);
+  vector_t b(8);
+
+  mix_constraints(A, b, c, x_bar, f_xbar);
+
+  for (int i = 0; i < 4; i++) {
+    I_m.setZero();
+    I_m(i) = 1;
+    A_tmp << I_m.transpose()*Hpow(0).transpose(), I_m.transpose()*Hpow(1).transpose();
+    std::cout << A <<std::endl << std::endl;
+    std::cout << A_tmp <<std::endl << std::endl;
+    std::cout << D.transpose().inverse() <<std::endl << std::endl;
+    std::cout << A*A_tmp*D.transpose().inverse() <<std::endl << std::endl;
+    A_u.block(8*i,0,8,4) << A*A_tmp*D.transpose().inverse(); // TODO: optiimize
+    b_u.segment(8*i, 8) << b;
+  }
+
+}
+
+void Bezier::vert2hyp(vector_t V, Eigen::Ref<matrix_t> A, Eigen::Ref<matrix_t> b) {
+ Eigen::Polyhedron poly; 
+}
+
+matrix_t Bezier::hyp2vert(matrix_t A, matrix_t b) {
+  Eigen::Polyhedron poly;
+  bool success = poly.setHrep(A, b);
+  auto vrep = poly.vrep();
+  matrix_t V;
+  V = vrep.first;
+  return V;
 }
