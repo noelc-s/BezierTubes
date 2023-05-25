@@ -1,10 +1,13 @@
+#ifndef __BEZIER_HPP__
+#define __BEZIER_HPP__
+
 #include <Eigen/Dense>
 #include <unsupported/Eigen/MatrixFunctions>
 #include "../inc/Types.h"
-#include "Polyhedron.h"
+// #include "Polyhedron.h"
 //#include "setoper.h"
-//#include "cdd.h"
-//#include "Polyhedron.h"
+// #include "cdd.h"
+#include "Polyhedron.h"
 
 using namespace bezier;
 
@@ -58,3 +61,4 @@ class Bezier {
   private:
     matrix_t Pascal_upper(int n);
 };
+#endif
