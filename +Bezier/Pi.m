@@ -1,4 +1,4 @@
-function [D, h] = Pi(H, c)
+function Pi = Pi(c,n,m)
 % A_mix = [];
 % b_mix = [];
 % c_ = [c; c];
@@ -77,16 +77,13 @@ function [D, h] = Pi(H, c)
 %     -c(1)*y(2) + c(2)*z(2);...
 %     -c(1)*y(2) - c(2)*z(2)];
 
-xbar = [0;0;0;0];
-f_xbar = [0;0];
+% xbar = [0;0;0;0];
+% f_xbar = [0;0];
 
 % c = [2 3];
 
 C = [c(1) c(1) -c(1) -c(1);
     c(2) -c(2) c(2) -c(2)];
-
-n = 4;
-m = 2;
 
 A = eye(n);
 B = eye(m);
@@ -98,10 +95,4 @@ Pi = [C(1,1)*Pi_1 C(2,1)*Pi_2;
     C(1,2)*Pi_1 C(2,2)*Pi_2;
     C(1,3)*Pi_1 C(2,3)*Pi_2;
     C(1,4)*Pi_1 C(2,4)*Pi_2];
-
-IH = [zeros(m,n-m) eye(m)]*H;
-
-D_ = [eye(n); IH];
-D = Pi*D_;
-h = ones(4*n*m,1) + Pi*[xbar; f_xbar];
 
