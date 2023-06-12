@@ -17,46 +17,29 @@ Lf = 1;
 Lg = 1;
 e_bar = 0;
 K = [-1 -1];
-[M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
-
 % Reference point 
 x0 = [0; 0];
 xbar = [0; 0];
 f_xbar = f(xbar');
 g_xbar = g(xbar');
 
+[M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+
 % Bezier Matrices
-H = Bezier.H(3, dt);
-D = Bezier.D(2,3,dt);
-D_nT = inv(D');
+order = 3;
+gamma = 2;
+H = Bezier.H(order, dt);
+D = Bezier.D(gamma,order,dt);
+D_nT = inv(D);
 Pi = Bezier.Pi(c,2,1);
-Z = Bezier.Z(3, dt);
+Z = Bezier.Z(order, dt);
 
 %% Constraint Calculation
-H_0 = H^0;
-H_1 = H^1;
-H_2 = H^2;
-A_x_ = [];
-b_x_ = [];
-A_u_ = [];
-b_u_ = [];
-for m = 1:4
-    I_m = zeros(1,4);
-    I_m(m) = 1;
-    A_tmp = [I_m*H_0'; I_m*H_1'];
-    
-    % input constaints
-    A_u_ = [A_u_; Pi*[eye(2)*A_tmp*D_nT;...
-        I_m*H_2'*D_nT]];
-    b_u_ = [b_u_; 1+Pi*[xbar; f_xbar]]; % has to match numerator of c.
-    
-    % and state constraints
-    A_x_ = [A_x_; A_x*A_tmp*D_nT];
-    b_x_ = [b_x_; b_x];
-    
-end
-A_in = [A_u_; A_x_];
-b_in = [b_u_; b_x_];
+
+[F, G] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, gamma);
+
+A_in = F*D_nT;
+b_in = G;
 
 clf
 IC = x0;
@@ -67,13 +50,13 @@ for r = 1:2
         A = A_in(:,3:4);
         b = b_in - A_in(:,1:2)*IC;
         x0 = IC;
-        color = 'b';
+        color = 'g';
     else
 %         Backward
         A = A_in(:,1:2);
         b = b_in - A_in(:,3:4)*IC;
         x1 = IC;
-        color = 'g';
+        color = 'b';
     end
 
 subplot(2,2,r)
@@ -98,14 +81,14 @@ for i = 1:size(Vert,1)-1
             x0 = (lambda*Vert(i,:) + (1-lambda)*Vert(i+1,:))';
         end
         
-        xi = inv(D')*[x0; x1];
-        Xi = [xi'; xi'*H];
-        q_d_gamma = Z(tau)*(xi'*H^2)';
+        xi = inv(D)*[x0; x1];
+        Xi = [xi H*xi];
+        q_d_gamma = Z(tau)'*(H^2*xi);
         
         subplot(2,2,r)
-        scatter(Xi(1,:),Xi(2,:))
+        scatter(Xi(:,1),Xi(:,2))
         tau = linspace(0,dt);
-        X_D = Z(tau)*Xi';
+        X_D = Z(tau)'*Xi;
         plot(X_D(:,1),X_D(:,2));
         
         U = 1./(g(X_D)).*(-f(X_D) + q_d_gamma);
