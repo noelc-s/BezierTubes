@@ -6,8 +6,34 @@
 
 
 int main() {
+  // Arguments of Bezier are: order of curve (must be at least 3), relative degree of output (2), 
+  // and time over which the curve is to be defined
   Bezier B = Bezier(3,2,1);
-  //std::cout << B.S << std::endl;
+  // These are the control points. In this example they are a vector:
+  vector_t xi(4); // of size (order+1)
+  xi << 0,0,1,1;
+  // This evaluates the bezier curve at the time (the first argument) 1.
+  std::cout << B.b(1, xi) << std::endl;
+  // The control points can also be a matrix (for multiple outputs, e.g. x,y
+  matrix_t xi2(4,2);
+  xi2 << 1,0,
+         1,0,
+         0,1,
+         0,1;
+  std::cout << B.b(1, xi2) << std::endl<<std::endl;
+  vector_t t(5);
+  t << 0,0.25, 0.5, 0.75, 1;
+  // The above functions can also be used with a sequence of time points
+  std::cout << B.b(t, xi) << std::endl;
+  std::cout << B.b(t, xi2) << std::endl;
+  // This is the bezier curve in state space evaluated at the time points t
+  std::cout << B.B(t, xi2) << std::endl;
+  // And this is the time derivative
+  std::cout << B.db(t,1, xi) << std::endl;
+  //
+  ///////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+  ///std::cout << B.S << std::endl;
   //std::cout << B.R_matrix(4) << std::endl;
   //std::cout << B.R << std::endl;
   //std::cout << B.H << std::endl << std::endl;
@@ -18,24 +44,7 @@ int main() {
 
   //std::cout << B.M_matrix(5) << std::endl;
   //std::cout << B.T(0.5) << std::endl;
-  vector_t xi(4);
-  xi << 0,0,1,1;
-  //std::cout << B.b(1, xi) << std::endl;
-  matrix_t xi2(4,2);
-  xi2 << 1,0,
-         1,0,
-         0,1,
-         0,1;
-  //std::cout <<xi2 <<std::endl<<std::endl;
-  //std::cout << B.b(1, xi2) << std::endl<<std::endl;
-  vector_t t(5);
-  t << 0,0.25, 0.5, 0.75, 1;
-  //std::cout << B.B(t, xi2) << std::endl;
-  //std::cout << B.b(t, xi) << std::endl;
-  //std::cout << B.b(t, xi2) << std::endl;
-  //std::cout << B.db(t,1, xi) << std::endl;
-  //
-  //
+/
 
   scalar_t Lf, Lg;
   vector_t x_bar(2);
