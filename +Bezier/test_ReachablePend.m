@@ -7,23 +7,31 @@
 % Parameters
 u_max = 10;
 dt = 1;
-A_x = [0 1; 0 -1; 1 0; -1 0];
-b_x = [1; 1; 1; 1];
+A_x = [1 0; -1 0; 0 1; 0 -1];
+b_x = [0.3; 0.3; 0.6; 0.6];
+
+steps = 20;
+
+m = 1;
+l = 1;
+gf = 1;
 
 % Dynamics
-f = @(x) -sin(x(:,2));
-g = @(x) 1+0*x(:,1);
+f = @(x) -gf/l*sin(x(:,1));
+g = @(x) 1/(m*l^2)+0*x(:,1);
 Lf = 1;
-Lg = 1;
+Lg = 1; % this is LG_inverse
 e_bar = 0;
 K = [-1 -1];
 % Reference point 
 x0 = [0; 0];
 xbar = [0; 0];
 f_xbar = f(xbar');
-g_xbar = g(xbar');
+g_xbar = 1./g(xbar'); % This is g_inverse
 
-[M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+[Q,Q_combined] = Bezier.Q(steps, 3);
+
+[M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
 
 % Bezier Matrices
 order = 3;
@@ -34,9 +42,13 @@ D_nT = inv(D);
 Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(order, dt);
 
+xbar = repmat(xbar,1,steps);
+f_xbar = repmat(f_xbar,1,steps);
+g_xbar = repmat(g_xbar,1,steps);
+
 %% Constraint Calculation
 
-[F, G] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, gamma);
+[F, G] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
 
 A_in = F*D_nT;
 b_in = G;
@@ -86,10 +98,11 @@ for i = 1:size(Vert,1)-1
         q_d_gamma = Z(tau)'*(H^2*xi);
         
         subplot(2,2,r)
-        scatter(Xi(:,1),Xi(:,2))
         tau = linspace(0,dt);
         X_D = Z(tau)'*Xi;
         plot(X_D(:,1),X_D(:,2));
+        Xi = Q_combined*Xi;
+        scatter(Xi(:,1),Xi(:,2))
         
         U = 1./(g(X_D)).*(-f(X_D) + q_d_gamma);
         subplot(2,2,r+2)

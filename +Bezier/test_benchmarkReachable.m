@@ -6,8 +6,8 @@
 
 % Parameters
 u_max =5;
-horizon_N = 10;
-dt = .1;
+horizon_N = 20;
+dt = .05;
 A_x = [0 1; 0 -1; 1 0; -1 0];
 b_x = 4*[1; 1; 1; 1];
 
@@ -53,7 +53,8 @@ Z = Bezier.Z(3, horizon_N*dt);
 
 color = 'g';
 tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, 2);
+[Q,Q_combined] = Bezier.Q(1, 3);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg, Lf, e_bar, K, u_max);
 A = A_in;
 b = b_in;
 
@@ -110,10 +111,11 @@ end
 
 xbar = x_bar;
 f_xbar = f(x_bar')';
+g_xbar = g(x_bar')';
 
 Q = Bezier.Q(horizon_N, 3);
 tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, 2,Q);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
 A = A_in;
 b = b_in;
 
@@ -159,7 +161,7 @@ for k = 1:horizon_N
     for i = 1:size(Vert_,1)
         IC = Vert_(i,:)';
         
-        [A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, 2);
+        [A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, g_xbar, 2);
         A = A_in;
         b = b_in;
         
@@ -176,7 +178,6 @@ for k = 1:horizon_N
             end
             Vert_tmp = [Vert_tmp; Vert(1:end-1,:)];
         end
-        patch(Vert(:,1),Vert(:,2),color,'facealpha',0.1);
     end
     Vert_ = Vert_tmp;
         if isempty(Vert_)
@@ -221,7 +222,7 @@ for k = 1:horizon_N
         [M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
         Pi = Bezier.Pi(c,2,1);
         
-        [A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, 2);
+        [A_in, b_in] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, g_xbar,2);
         A = A_in;
         b = b_in;
         

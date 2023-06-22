@@ -5,6 +5,8 @@
 #include "Polyhedron.h"
 
 
+
+// TODO: MAJOR: Have to update pybind11 because RowMajor format is incompatible with other programs. Se the pybind11 storage order docs for eigen to resolve this.
 int main() {
   // Arguments of Bezier are: order of curve (must be at least 3), relative degree of output (2), 
   // and time over which the curve is to be defined
@@ -44,7 +46,7 @@ int main() {
 
   //std::cout << B.M_matrix(5) << std::endl;
   //std::cout << B.T(0.5) << std::endl;
-/
+
 
   scalar_t Lf, Lg;
   vector_t x_bar(2);

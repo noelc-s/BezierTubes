@@ -1,9 +1,17 @@
-function [F, G] = F_G(Ax, bx, Pi, H, xbar, f_xbar, gamma, varargin)
+function [F, G] = F_G(Ax, bx, H, xbar, f_xbar, g_xbar, gamma, varargin)
 
 order = size(H,1);
 
+use_Q = false;
+
 if ~isempty(varargin)
     Q = varargin{1};
+    Lg = varargin{2};
+    Lf = varargin{3};
+    e_bar = varargin{4};
+    K = varargin{5};
+    u_max = varargin{6};
+%     use_Q = true;
 else
     Q = {eye(order)};
 end
@@ -20,6 +28,10 @@ for i = 1:order
     I_m = zeros(1,order);
     I_m(i) = 1;
     I_m = I_m*Q{j};
+%     if use_Q
+        [~,~,~, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar(:,j), e_bar, K, u_max);
+        Pi = Bezier.Pi(c,2,1); % n,m
+%     end
     A_u = [A_u; Pi*kron(eye(gamma+1),I_m)];
     b_u = [b_u; 1+Pi*[xbar(:,j); f_xbar(:,j)]];
     

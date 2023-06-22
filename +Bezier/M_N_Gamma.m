@@ -1,4 +1,4 @@
-function [M, N, Gamma, c] = M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max)
+function [M, N, Gamma, c, M_og] = M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max)
 
 M_og = 1/2*[2*Lg*Lf Lg; Lg 0];
 N = [2*Lg*Lf*e_bar + Lf*norm(g_xbar,2) + Lg*norm(K,2)*e_bar; norm(g_xbar,2)+Lg*e_bar];

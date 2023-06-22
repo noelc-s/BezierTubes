@@ -72,4 +72,31 @@ hold on;
 plot(C(:,1),C(:,2))
 end
 
+%% 2D curve
+%% Connect boundary conditions of minimal curves
+clf
+dt = 1;
+gamma = 2;
+order = 2*gamma-1; % minimal curve
+
+x0 = [0 0;...
+      0 0];
+x1 = [1 1;...
+      1 1];
+H = Bezier.H(order, dt);
+D = Bezier.D(gamma,order, dt);
+xi = D\[x0(:,1) x0(:,2) x1(:,1) x1(:,2)]';
+
+
+Xi = [xi H*xi];
+
+figure(1)
+scatter(Xi(:,1),Xi(:,2))
+Z = Bezier.Z(order, dt);
+tau = linspace(0,1);
+C = Z(tau)'*Xi;
+hold on;
+plot(C(:,1),C(:,2))
+
+
 

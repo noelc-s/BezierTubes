@@ -68,9 +68,9 @@ using vector_array3_t = std::vector<vector_array2_t>;
 using row_vector_t = Eigen::Matrix<scalar_t, 1, Eigen::Dynamic>;
 
 /** Dynamic-size matrix type. */
-using matrix_t = Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using matrix_t = Eigen::Matrix<scalar_t, Eigen::Dynamic, Eigen::Dynamic>;
 /** Static-size Matrix type. */
-using matrix_3t = Eigen::Matrix<scalar_t, 3, 3, Eigen::RowMajor>;
+using matrix_3t = Eigen::Matrix<scalar_t, 3, 3>;
 /** Dynamic matrix's trajectory type. */
 using matrix_array_t = std::vector<matrix_t>;
 /** Array of dynamic matrix's trajectory type. */
