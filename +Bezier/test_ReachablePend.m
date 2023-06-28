@@ -5,20 +5,20 @@
 % state and input constraint satisfaction.
 
 % Parameters
-u_max = 10;
+u_max = 1;
 dt = 1;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [0.3; 0.3; 0.6; 0.6];
 
-steps = 20;
+steps = 1;
 
 m = 1;
 l = 1;
 gf = 1;
 
 % Dynamics
-f = @(x) -gf/l*sin(x(:,1));
-g = @(x) 1/(m*l^2)+0*x(:,1);
+f = @(x) -gf/l*sin(x(1,:));
+g = @(x) 1/(m*l^2)+0*x(1,:);
 Lf = 1;
 Lg = 1; % this is LG_inverse
 e_bar = 0;
@@ -48,42 +48,51 @@ g_xbar = repmat(g_xbar,1,steps);
 
 %% Constraint Calculation
 
-[F, G] = Bezier.F_G(A_x, b_x, Pi, H, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
-
-A_in = F*D_nT;
-b_in = G;
+[F, G] = Bezier.F_G(A_x, b_x, H, m, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
 
 clf
 IC = x0;
+
+Delta_vec = Bezier.Delta_vec(m, order, gamma);
+H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
+D_vec = Delta_vec*H_vec;
 %% Plot Reachable sets
 for r = 1:2
     if r == 1
 %         Forward
-        A = A_in(:,3:4);
-        b = b_in - A_in(:,1:2)*IC;
+    Vert = cddmex('extreme',struct('A',[D_vec(1:2,:); F],'B',[IC;G],'lin',1:2));
+    Vert = Bezier.Poly.conv((D_vec(3:4,:)*Vert.V')');
+    [Hred]=cddmex('reduce_h',struct('A',[D_vec(1:2,:); F],'B',[IC;G],'lin',1:2));
+    A = Hred.A;
+    b = Hred.B;
         x0 = IC;
         color = 'g';
     else
 %         Backward
-        A = A_in(:,1:2);
-        b = b_in - A_in(:,3:4)*IC;
+    Vert = cddmex('extreme',struct('A',[D_vec(3:4,:); F],'B',[IC;G],'lin',1:2));
+    Vert = Bezier.Poly.conv((D_vec(1:2,:)*Vert.V')');
+    [Hred]=cddmex('reduce_h',struct('A',[D_vec(3:4,:); F],'B',[IC;G],'lin',1:2));
+    A = Hred.A;
+    b = Hred.B;
         x1 = IC;
         color = 'b';
     end
 
-subplot(2,2,r)
+subplot(3,2,r)
 hold on;
 patch([b_x(2) b_x(1) -b_x(2) -b_x(1)],[b_x(4) -b_x(3) -b_x(4) b_x(3)],'k','facealpha',0.1)
 axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-0.1 b_x(3)+0.1]);
-Vert = Bezier.Poly.hyp2vert(A,b);
-ind = convhull(Vert);
-Vert = Vert(ind,:);
+
 patch(Vert(:,1),Vert(:,2),color,'facealpha',0.1);
-subplot(2,2,r+2)
+subplot(3,2,r+2);
+hold on;
+subplot(3,2,r+4)
 hold on;
 line([0 dt],[1 1]*u_max)
 line([0 dt],-[1 1]*u_max)
 axis([0 dt -u_max-1 u_max+1]);
+
+tau = linspace(0,dt);
 
 for i = 1:size(Vert,1)-1
     for lambda = 0:0.1:1
@@ -93,19 +102,22 @@ for i = 1:size(Vert,1)-1
             x0 = (lambda*Vert(i,:) + (1-lambda)*Vert(i+1,:))';
         end
         
-        xi = inv(D)*[x0; x1];
-        Xi = [xi H*xi];
-        q_d_gamma = Z(tau)'*(H^2*xi);
+        X = [x0 x1];
+        P = X(:)'/D;
+        Xi = [P; P*H];
+        q_d_gamma = (P*H^2)* Z(tau);
         
-        subplot(2,2,r)
-        tau = linspace(0,dt);
-        X_D = Z(tau)'*Xi;
-        plot(X_D(:,1),X_D(:,2));
-        Xi = Q_combined*Xi;
-        scatter(Xi(:,1),Xi(:,2))
+        subplot(3,2,r)
+        X_D = Xi*Z(tau);
+        plot(X_D(1,:),X_D(2,:));
+        Xi = Xi*Q_combined;
+        scatter(Xi(1,:),Xi(2,:))
+        
+        subplot(3,2,r+2)
+        plot(tau, q_d_gamma);
         
         U = 1./(g(X_D)).*(-f(X_D) + q_d_gamma);
-        subplot(2,2,r+2)
+        subplot(3,2,r+4)
         plot(tau,U)
     end
 end

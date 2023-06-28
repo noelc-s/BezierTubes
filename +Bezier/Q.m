@@ -2,7 +2,7 @@ function [Q_store, Q_stack] = Q(segments, order)
 
 M = Bezier.M(order);
 
-Q_stack = zeros(segments*(order+1), order+1);
+Q_stack = zeros(order+1,segments*(order+1));
 index = 1;
 Q{index} = eye(order+1);
 for j = segments-1:-1:0
@@ -25,7 +25,7 @@ for j = segments-1:-1:0
     Q{index+1} = Q_1*Q{index};
     % Second segment gets stored
     Q_store{index} = Q_2*Q{index};
-    Q_stack((j)*(order+1)+1:(j+1)*(order+1),:) = Q_store{index};
+    Q_stack(:,(j)*(order+1)+1:(j+1)*(order+1)) = Q_store{index};
     
     index = index+1;
 end
@@ -39,7 +39,7 @@ end
 
 % Go from first to last
 Q_store = fliplr(Q_store);
-Q_stack(1:order+1,:) = Q_store{1};
+Q_stack(:,1:order+1) = Q_store{1};
 
 % Xi_split{j+1} = (Q*Xi')';
 

@@ -1,4 +1,4 @@
-function Pi = Pi(c,n,m)
+function Pi = Pi(c,m, gamma)
 % A_mix = [];
 % b_mix = [];
 % c_ = [c; c];
@@ -84,6 +84,8 @@ function Pi = Pi(c,n,m)
 
 C = [c(1) c(1) -c(1) -c(1);
     c(2) -c(2) c(2) -c(2)];
+
+n = m*gamma;
 
 A = eye(n);
 B = eye(m);

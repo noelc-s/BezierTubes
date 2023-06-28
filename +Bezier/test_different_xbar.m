@@ -65,12 +65,8 @@ D_nT = inv(D');
 Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(3, horizon_N*dt);
 
-for tau = 0:0.02:20*pi
-
-X0 = [cos(tau); sin(tau)];  
+X0 = [0; 1];  
     
-% Forward
-% Dynamic bias
 x1 = X0;
 x_bar = [];
 for i = 1:horizon_N
@@ -83,6 +79,61 @@ for i = 1:horizon_N
     end
     x_bar = [x_bar x1];
 end
+x_barf = x_bar;
+xbar = x_bar;
+f_xbar = f(x_bar')';
+g_xbar = g(x_bar')';
+Q = Bezier.Q(horizon_N, 3);
+% tic
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+A = A_in;
+b = b_in;
+Vert_f = cddmex('extreme',struct('A',[D(1:2,:); A],'B',[X0;b],'lin',1:2));
+Vert_f = Vert_f.V*D(3:4,:)';
+ind = convhull(Vert_f);
+Vert_f = Vert_f(ind,:);
+patch(Vert_f(:,1),Vert_f(:,2),[0 1 0],'facealpha',0.03,'edgecolor',[0.1 0.7 0.1],'linewidth',2);
+scatter(x_bar(1,:),x_bar(2,:),50,[0.1 0.7 0.1],'filled');
+
+
+x1 = X0;
+x_bar = [];
+for i = 1:horizon_N
+    x0 = x1;
+    A = Df_func(x0(1),x0(2));
+    if i == 1
+        x1 = expm(-A*dt/2)*x0;
+    else
+        x1 = expm(-A*dt)*x0;
+    end
+    x_bar = [x1 x_bar ];
+end
+x_barb = x_bar;
+xbar = x_bar;
+f_xbar = f(x_bar')';
+g_xbar = g(x_bar')';
+Q = Bezier.Q(horizon_N, 3);
+% tic
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+A = A_in;
+b = b_in;
+Vert_b = cddmex('extreme',struct('A',[D(3:4,:); A],'B',[X0;b],'lin',1:2));
+Vert_b = Vert_b.V*D(1:2,:)';
+ind = convhull(Vert_b);
+Vert_b = Vert_b(ind,:);
+patch(Vert_b(:,1),Vert_b(:,2),[0 0 1],'facealpha',0.03,'edgecolor',[0.1 0.1 0.7],'linewidth',2);
+scatter(x_bar(1,:),x_bar(2,:),50,[0.1 0.1 0.7],'filled');
+
+for tau = 0:0.02:20*pi
+
+X0 = [0; 1];  
+    
+% Forward
+% Dynamic bias
+x1 = X0;
+
+x_bar = [linspace(X0(1), X0(1)+cos(tau),horizon_N);...
+        linspace(X0(2), X0(2)+sin(tau),horizon_N)];
 x_barf = x_bar;
 
 xbar = x_bar;
@@ -103,17 +154,8 @@ Vert_f = Vert_f.V*D(3:4,:)';
 % Backward
 % Dynamic bias
 x1 = X0;
-x_bar = [];
-for i = 1:horizon_N
-    x0 = x1;
-    A = Df_func(x0(1),x0(2));
-    if i == 1
-        x1 = expm(-A*dt/2)*x0;
-    else
-        x1 = expm(-A*dt)*x0;
-    end
-    x_bar = [x1 x_bar ];
-end
+x_bar = [linspace(X0(1)-cos(tau),X0(1),horizon_N);...
+        linspace(X0(2)-sin(tau),X0(2),horizon_N)];
 x_barb = x_bar;
 
 xbar = x_bar;
