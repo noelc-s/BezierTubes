@@ -23,28 +23,34 @@ b_u = [];
 A_x = [];
 b_x = [];
 
-H_vec = Bezier.H_vec(H, m, order-1, gamma, gamma);
+% for j = 1:size(xbar,2)
+% for i = 1:order
+%     I_m = zeros(1,order);
+%     I_m(i) = 1;
+%     I_m = I_m*Q{j}';
+% %     if use_Q
+%         [~,~,~, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar(:,j), e_bar, K, u_max);
+%         Pi = Bezier.Pi(c,m, gamma);
+% %     end
+%     A_u = [A_u; Pi*kron(I_m,eye(gamma+1))];
+%     b_u = [b_u; 1+Pi*[xbar(:,j); f_xbar(:,j)]];
+%     
+%     A_x = [A_x; Ax*kron(I_m,eye(gamma))];
+%     b_x = [b_x; bx];
+% end
+% end
+
+F = [];
+G = [];
 
 for j = 1:size(xbar,2)
-for i = 1:order
-    I_m = zeros(1,order);
-    I_m(i) = 1;
-    I_m = I_m*Q{j};
-%     if use_Q
-        [~,~,~, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar(:,j), e_bar, K, u_max);
-        Pi = Bezier.Pi(c,m, gamma);
-%     end
-    A_u = [A_u; Pi*kron(I_m,eye(gamma+1))];
-    b_u = [b_u; 1+Pi*[xbar(:,j); f_xbar(:,j)]];
-    
-    A_x = [A_x; Ax*kron(I_m,eye(gamma))];
-    b_x = [b_x; bx];
+    H_vec = Bezier.H_vec(H, m, order-1, gamma, gamma);
+    H_vec2 = Bezier.H_vec(H, m, order-1, gamma, gamma-1);
+    [~,~,~, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar(:,j), e_bar, K, u_max);
+    Pi = Bezier.Pi(c,m, gamma);
+    F = [F;kron(eye(order),Pi)*kron(Q{j}',eye(gamma+1))*H_vec; kron(eye(order),Ax)*kron(Q{j}',eye(gamma))*H_vec2];
+    G = [G;kron(ones(order,1),1+Pi*[xbar(:,j); f_xbar(:,j)]); kron(ones(order,1),bx)];
 end
-end
-
-H_vec2 = Bezier.H_vec(H, m, order-1, gamma, gamma-1);
-F = [kron(eye(order),Pi)*H_vec; kron(eye(order),Ax)*H_vec2];
-G = [kron(ones(order,1),1+Pi*[xbar(:,j); f_xbar(:,j)]); kron(ones(order,1),bx)];
 
 % H_ = [];
 % % Q_i times H

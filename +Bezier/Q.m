@@ -24,7 +24,7 @@ for j = segments-1:-1:0
     % First segments splitting is iterative
     Q{index+1} = Q_1*Q{index};
     % Second segment gets stored
-    Q_store{index} = Q_2*Q{index};
+    Q_store{index} = (Q_2*Q{index})';
     Q_stack(:,(j)*(order+1)+1:(j+1)*(order+1)) = Q_store{index};
     
     index = index+1;

@@ -12,8 +12,10 @@ classdef Poly
         end
 
         function V = conv(V)
-            ind = convhull(V);
-            V = V(ind,:);
+            if ~isempty(V)
+                ind = convhull(V);
+                V = V(ind,:);
+            end
         end
     end
 end

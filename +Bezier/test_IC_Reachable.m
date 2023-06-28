@@ -10,6 +10,9 @@ horizon_N = 5;
 dt = .5;
 A_x = [0 1; 0 -1; 1 0; -1 0];
 b_x = 2*[1; 1; 1; 1];
+m=1;
+order=3;
+gamma=2;
 
 % Dynamics
 f = @(x) -sin(x(:,1));
@@ -64,6 +67,9 @@ D = Bezier.D(2,3,horizon_N*dt);
 D_nT = inv(D');
 Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(3, horizon_N*dt);
+Delta_vec = Bezier.Delta_vec(m, order, gamma);
+H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
+D_vec = Delta_vec*H_vec;
 
 for tau = 0:0.02:20*pi
 
@@ -91,13 +97,13 @@ g_xbar = g(x_bar')';
 
 Q = Bezier.Q(horizon_N, 3);
 % tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H,m, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
 A = A_in;
 b = b_in;
 
 
-Vert_f = cddmex('extreme',struct('A',[D(1:2,:); A],'B',[X0;b],'lin',1:2));
-Vert_f = Vert_f.V*D(3:4,:)';
+Vert_f = cddmex('extreme',struct('A',[D_vec(1:2,:); A],'B',[X0;b],'lin',1:2));
+Vert_f = Bezier.Poly.conv((D_vec(3:4,:)*Vert_f.V')');
 % toc
 
 % Backward
@@ -122,12 +128,12 @@ g_xbar = g(x_bar')';
 
 Q = Bezier.Q(horizon_N, 3);
 % tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H,m, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
 A = A_in;
 b = b_in;
 
-Vert_b = cddmex('extreme',struct('A',[D(3:4,:); A],'B',[X0;b],'lin',1:2));
-Vert_b = Vert_b.V*D(1:2,:)';
+Vert_b = cddmex('extreme',struct('A',[D_vec(3:4,:); A],'B',[X0;b],'lin',1:2));
+Vert_b = Bezier.Poly.conv((D_vec(1:2,:)*Vert_b.V')');
 
 if size(Vert_b,1)>2
     ind = convhull(Vert_b);

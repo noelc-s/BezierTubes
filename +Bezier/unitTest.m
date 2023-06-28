@@ -51,7 +51,7 @@ segments =  10;
 
 Q = Bezier.Q(segments, order);
 for i = 1:segments
-   Xi_split{i} = Xi*Q{i}'; 
+   Xi_split{i} = Xi*Q{i}; 
 end
 
 figure(1)
@@ -64,8 +64,8 @@ plot(C(:,1),C(:,2))
 
 for j = 1:segments
 scatter(Xi_split{j}(1,:),Xi_split{j}(2,:))
-Z = Bezier.Z(order, dt/2);
-tau = linspace(0,dt/2);
+Z = Bezier.Z(order, 1);
+tau = linspace(0,1);
 C = Xi_split{j}*Z(tau);
 hold on;
 plot(C(1,:),C(2,:))

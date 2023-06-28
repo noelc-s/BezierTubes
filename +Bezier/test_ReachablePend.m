@@ -10,7 +10,7 @@ dt = 1;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [0.3; 0.3; 0.6; 0.6];
 
-steps = 1;
+steps = 2;
 
 m = 1;
 l = 1;
@@ -26,8 +26,8 @@ K = [-1 -1];
 % Reference point 
 x0 = [0; 0];
 xbar = [0; 0];
-f_xbar = f(xbar');
-g_xbar = 1./g(xbar'); % This is g_inverse
+f_xbar = f(xbar);
+g_xbar = 1./g(xbar); % This is g_inverse
 
 [Q,Q_combined] = Bezier.Q(steps, 3);
 
