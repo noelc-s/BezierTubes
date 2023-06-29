@@ -5,11 +5,11 @@
 % - 1 step reachable with N step B-spline over N*dt
 
 % Parameters
-u_max = 5;
-horizon_N = 5;
-dt = .5;
+u_max = 1;
+horizon_N = 10;
+dt = 1;
 A_x = [0 1; 0 -1; 1 0; -1 0];
-b_x = 2*[1; 1; 1; 1];
+b_x = 6*[1; 1; 1; 1];
 m=1;
 order=3;
 gamma=2;
@@ -62,18 +62,20 @@ axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-1 b_x(3)+1]);
 
 %% 1 step B-spline reachable over dt, different x_bar
 % Bezier Matrices for N*dt
-H = Bezier.H(3, horizon_N*dt);
-D = Bezier.D(2,3,horizon_N*dt);
+H = Bezier.H(3, dt);
+D = Bezier.D(2,3,dt);
 D_nT = inv(D');
 Pi = Bezier.Pi(c,2,1);
-Z = Bezier.Z(3, horizon_N*dt);
+Z = Bezier.Z(3, dt);
 Delta_vec = Bezier.Delta_vec(m, order, gamma);
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
 D_vec = Delta_vec*H_vec;
 
 for tau = 0:0.02:20*pi
 
-X0 = [cos(tau); sin(tau)];  
+% X0 = [0; 0]; 
+X0 = [pi; sin(tau)]; 
+% X0 = [cos(tau); sin(tau)]; 
     
 % Forward
 % Dynamic bias
@@ -83,10 +85,16 @@ for i = 1:horizon_N
     x0 = x1;
     A = Df_func(x0(1),x0(2));
     if i == 1
-        x1 = expm(A*dt/2)*x0;
+        x1 = x0 + (dt/horizon_N)/2*(f_func(x0(1),x0(2)));
+%         [Ad,~,Cd] = css2dss('Exact',(dt/horizon_N)/2,A,[0;0],-A*x0);
+%         x1 = expm(A*(dt/horizon_N)/2)*x0;
+%         x1 = x0;
     else
-        x1 = expm(A*dt)*x0;
+        x1 = x0 + (dt/horizon_N)*(f_func(x0(1),x0(2)));
+%         [Ad,~,Cd] = css2dss('Exact',(dt/horizon_N),A,[0;0],-A*x0);
+%         x1 = expm(A*(dt/horizon_N))*x0;
     end
+%     x1 = Ad*X0+Cd;
     x_bar = [x_bar x1];
 end
 x_barf = x_bar;
@@ -112,12 +120,17 @@ x1 = X0;
 x_bar = [];
 for i = 1:horizon_N
     x0 = x1;
-    A = Df_func(x0(1),x0(2));
+%     A = Df_func(x0(1),x0(2));
     if i == 1
-        x1 = expm(-A*dt/2)*x0;
+        x1 = x0 + (-dt/horizon_N)/2*(f_func(x0(1),x0(2)));
+%         [Ad,~,Cd] = css2dss('Exact',-(dt/horizon_N)/2,A,[0;0],-A*x0);
+%         x1 = expm(-A*(dt/horizon_N)/2)*x0;
     else
-        x1 = expm(-A*dt)*x0;
+        x1 = x0 + (-dt/horizon_N)*(f_func(x0(1),x0(2)));
+%         [Ad,~,Cd] = css2dss('Exact',-(dt/horizon_N),A,[0;0],-A*x0);
+%         x1 = expm(-A*(dt/horizon_N))*x0;
     end
+%     x1 = Ad*X0+Cd;
     x_bar = [x1 x_bar ];
 end
 x_barb = x_bar;
@@ -159,4 +172,39 @@ xb_b.YData = x_barb(2,:);
 x0_plot.XData = X0(1);
 x0_plot.YData = X0(2);
 drawnow
+end
+
+
+function [Ad,Bd,Cd] = css2dss(discretization_method,Ts,A,B,C)
+% Discretize state space model (c2d)
+[nx,nu] = size(B);
+nd = size(C,2);
+
+switch discretization_method
+    case 'Exact'
+        dss = expm([A B C; zeros(nu+nd,nx+nu+nd)]*Ts);
+        Ad = dss(1:nx,1:nx);
+        Bd = dss(1:nx,nx+1:nx+nu);
+        Cd = dss(1:nx,nx+nu+1:nx+nu+nd);
+    case 'Forward Euler'
+        Ad = eye(size(A))+A*Ts;
+        Bd = B*Ts;
+        Cd = C*Ts;
+    case 'Backward Euler'
+        Ad = inv(eye(size(A))-A*Ts);
+        Bd = Ad*B*Ts;
+        if ~isempty(C)
+            Cd = Ad*C*Ts;
+        else
+            Cd = [];
+        end
+    case 'Tustin'
+        Ad = (eye(size(A))+A*Ts/2)*inv(eye(size(A))-A*Ts/2);
+        Bd = inv(eye(size(A))-A*Ts/2)*B*(Ts);
+        if ~isempty(C)
+            Cd = inv(eye(size(A))-A*Ts/2)*C*(Ts);
+        else
+            Cd = [];
+        end
+end
 end

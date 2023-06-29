@@ -5,12 +5,12 @@
 % state and input constraint satisfaction.
 
 % Parameters
-u_max = 1;
-dt = 1;
+u_max = 5;
+dt = .5;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [0.3; 0.3; 0.6; 0.6];
 
-steps = 2;
+steps = 5;
 
 m = 1;
 l = 1;
