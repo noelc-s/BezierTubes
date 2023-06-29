@@ -30,7 +30,7 @@ Lf2y_func = matlabFunction(Lf2y,'Vars',x_sym);
 LgLfy_func = matlabFunction(LgLfy,'Vars',x_sym);
 
 %% Parameters
-u_max = 9;
+u_max = 1;
 dt = 1;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = 5*[1;1;1;1];
@@ -149,6 +149,8 @@ for i = 1:numel(X)
     f_xbar = f(x_bar')';
     g_xbar = g(x_bar')';
     [F,G] = Bezier.F_G(A_x, b_x, H,m, x_bar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+%     A_f = F(:,3:4);
+%     b_f = G-F(:,1:2)*D_vec(1:2,1:2)*x_k;
     Vert_f = cddmex('extreme',struct('A',[D_vec(1:2,:); F],'B',[x_k;G],'lin',1:2));
     Vert_f = (D_vec(3:4,:)*Vert_f.V')';
     if size(Vert_f,1)>2 && size(uniquetol(Vert_f,1e-3,'ByRows',true),1)>1
@@ -185,6 +187,8 @@ for i = 1:numel(X)
     f_xbar = f(x_bar')';
     g_xbar = g(x_bar')';
     [F,G] = Bezier.F_G(A_x, b_x, H,m, x_bar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+%     A_b = F(:,1:2);
+%     b_b = G-F(:,3:4)*D_vec(3:4,3:4)*x_k;
     Vert_b = cddmex('extreme',struct('A',[D_vec(3:4,:); F],'B',[x_k;G],'lin',1:2));
     Vert_b = (D_vec(1:2,:)*Vert_b.V')';
     if size(Vert_b,1)>2 && size(uniquetol(Vert_b,1e-3,'ByRows',true),1)>1
@@ -209,7 +213,9 @@ for i = 1:numel(X)
         b_b = [];
     end
 
+    if plot_anything
         drawnow;
+    end
     Gr.Nodes.x(ind_+1,:) = x_k;
     Gr.Nodes.F{ind_+1} = [A_f b_f];
     Gr.Nodes.B{ind_+1} = [A_b b_b];
@@ -242,18 +248,19 @@ for i = 1:Gr.numnodes
                 IN= struct('obj',objective,'A',[A_in],'B',[b_in]);
                 OUT = cddmex('solve_lp',IN);
                 if OUT.how==1
-                    Vert = Bezier.Poly.hyp2vert(A_in, b_in);
-                    if size(Vert,1)>2
-                        Vert = Bezier.Poly.conv(Vert);
+%                     Vert = Bezier.Poly.hyp2vert(A_in, b_in);
+%                     if size(Vert,1)>2
+%                         Vert = Bezier.Poly.conv(Vert);
                         s(ind) = i;
                         t(ind) = j;
                         if plot_anything && plot_traj
-                            line([Gr.Nodes.x(i,1) Gr.Nodes.x(j,1)],[Gr.Nodes.x(i,2) Gr.Nodes.x(j,2)])
+                            line([X_K{i}(1) X_K{j}(1)],[X_K{i}(2) X_K{j}(2)])
                         end
-                        w(ind) = norm(Gr.Nodes.x(i,:) - mean(Vert))+norm(Gr.Nodes.x(j,:) - mean(Vert));
+%                         w(ind) = norm(X_K{i} - mean(Vert))+norm(X_K{j}(1) - mean(Vert));
+                        w(ind) = norm(X_K{i} - OUT.xopt)+norm(X_K{j}(1) - OUT.xopt);
 %                         w(ind) = 1;
                         ind = ind+1;
-                    end
+%                     end
                 end
             end
         end
@@ -308,6 +315,8 @@ for i = 1:size(x_nodes,1)-1
     T = [T tau+T(end)];
 end
 T = T(2:end);
+
+pause
 subplot(2,2,[3 4]); hold on;
 set(gca,'TickLabelInterpreter', 'latex');
 set(gca,'FontSize',17)
@@ -315,7 +324,7 @@ set(gca,'linewidth',2)
 plot(T,Pos,'linewidth',2);
 plot(T,V,'linewidth',2);
 
-%% Animate
+% Animate
 subplot(2,2,2)
 set(gcf,'renderer','painters')
 
