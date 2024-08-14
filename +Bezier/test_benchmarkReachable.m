@@ -28,7 +28,7 @@ Df_func = matlabFunction(Df_model,'Vars',x_sym);
 Dg_func = matlabFunction(Dg_model,'Vars',x_sym);
 
 % Reference point
-x0 = [0; 2];
+x0 = [0; 0];
 
 xbar = x0;
 f_xbar = f(xbar');
@@ -54,7 +54,7 @@ Z = Bezier.Z(3, horizon_N*dt);
 color = 'g';
 tic
 [Q,Q_combined] = Bezier.Q(1, 3);
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg, Lf, e_bar, K, u_max);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H, 1, xbar, f_xbar, g_xbar, 2,Q,Lg, Lf, e_bar, K, u_max);
 A = A_in;
 b = b_in;
 
@@ -74,7 +74,7 @@ if ~isempty(Vert)
     ind = convhull(Vert);
     Vert = Vert(ind,:);
 end
-%     patch(Vert(:,1),Vert(:,2),color,'facealpha',0.1);
+    patch(Vert(:,1),Vert(:,2),color,'facealpha',0.1);
 % end
 Vert1 = Vert;
 

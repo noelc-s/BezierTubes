@@ -5,7 +5,7 @@ gamma = 2;
 order = 2*gamma-1; % minimal curve
 m = 1;
 
-x0 = [0; 0];
+x0 = [-1; 0];
 x1 = [1; 1];
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order, dt);
@@ -24,7 +24,10 @@ plot(C(1,:),C(2,:))
 %% Vectorization test
 % commutation matrix K
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
-assert(all(vec(Xi) == H_vec*vec(P)))
+assert(all(Xi(:) == H_vec*P(:)))
+
+%% index the control points from X
+
 
 %% Refine
 for r = 3:10
@@ -87,7 +90,7 @@ X = [x0 x1];
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order, dt);
 
-x = vec(X);
+x = X(:); % vectorized
 Delta = Bezier.Delta(order);
 Delta_vec = Bezier.Delta_vec(m, order, gamma);
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
@@ -112,6 +115,6 @@ plot(C(2,:),C(4,:))
 %% Vectorization test
 % commutation matrix K
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
-assert(all(vec(Xi) == H_vec*vec(P)))
+assert(all(Xi(:) == H_vec*P(:)))
 
 

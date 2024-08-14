@@ -1,0 +1,4 @@
+/home/noelcs/repos/BezierTubes/cpp/build/CMakeFiles/BEZIER.dir
+/home/noelcs/repos/BezierTubes/cpp/build/CMakeFiles/main.dir
+/home/noelcs/repos/BezierTubes/cpp/build/CMakeFiles/edit_cache.dir
+/home/noelcs/repos/BezierTubes/cpp/build/CMakeFiles/rebuild_cache.dir

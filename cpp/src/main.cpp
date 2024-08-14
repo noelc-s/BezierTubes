@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include "../inc/Bezier.h"
 #include "../inc/Types.h"
-#include "Polyhedron.h"
+// #include "Polyhedron.h"
 
 
 
@@ -72,7 +72,7 @@ int main() {
   p1 = (-N(0) + sqrt(pow(N(0),2)+4*M(0,0)*offset))/(2*M(0,0));
   p2 = (-N(1) + sqrt(pow(N(1),2)+4*M(1,1)*offset))/(2*M(1,1)); 
 
-  Eigen::Polyhedron poly;
+  // Eigen::Polyhedron poly;
 
   int n = 2;
   int m = 1;
@@ -84,12 +84,12 @@ int main() {
   B.input_constraints(A_mix, b_mix, c, x_bar, f_xbar);
   std::cout << A_mix << std::endl<<std::endl;
   std::cout << b_mix << std::endl<<std::endl;
-  matrix_t V;
-  V = B.hyp2vert(A_mix.block(0,0,32,2), b_mix);
+  // matrix_t V;
+  // V = B.hyp2vert(A_mix.block(0,0,32,2), b_mix);
   //bool success = poly.setHrep(A_mix, b_mix);
   //auto vrep = poly.vrep();
   //std::cout << std::endl<<std::endl;
   //std::cout << vrep.first << std::endl;
   //std::cout << vrep.second << std::endl;
-  std::cout <<  V << std::endl;
+  // std::cout <<  V << std::endl;
 }

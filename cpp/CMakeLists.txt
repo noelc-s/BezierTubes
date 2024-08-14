@@ -10,21 +10,21 @@ set(CMAKE_CXX_FLAGS "-O3 -pthread")
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
-find_package(cdd REQUIRED)
-include_directories(/home/noel/repos/eigen-cddlib_install/include/eigen-cdd)
+# find_package(cdd REQUIRED)
+# include_directories(/home/noel/repos/eigen-cddlib_install/include/eigen-cdd)
 
 add_library(BEZIER SHARED
 	src/Bezier.cpp
 )
 
 target_link_libraries(BEZIER Eigen3::Eigen)
-target_link_libraries(BEZIER cdd)
+# target_link_libraries(BEZIER cdd)
 
 add_executable(main src/main.cpp)
 target_link_libraries(main BEZIER)
 add_library(cddeigen SHARED IMPORTED)
-set_target_properties(cddeigen PROPERTIES IMPORTED_LOCATION /home/noel/repos/eigen-cddlib_install/lib/libeigen-cdd.so)
-target_link_libraries(main cddeigen)
+# set_target_properties(cddeigen PROPERTIES IMPORTED_LOCATION /home/noel/repos/eigen-cddlib_install/lib/libeigen-cdd.so)
+# target_link_libraries(main cddeigen)
 
 #################### GoogleTest ###########################
 # include(FetchContent)
@@ -47,7 +47,7 @@ target_link_libraries(main cddeigen)
 # gtest_discover_tests(hello_test)
 
 ############################### Pybind11 ##############################
-add_subdirectory(pybind11)
-pybind11_add_module(bezier "../bindings/bezier.cpp")
-target_link_libraries(bezier PUBLIC BEZIER)
-target_link_libraries(bezier PUBLIC cddeigen)
+# add_subdirectory(pybind11)
+# pybind11_add_module(bezier "../bindings/bezier.cpp")
+# target_link_libraries(bezier PUBLIC BEZIER)
+# target_link_libraries(bezier PUBLIC cddeigen)

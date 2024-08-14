@@ -1,6 +1,20 @@
 #include "../inc/Bezier.h"
 #include <iostream>
 
+// Function to compute the Kronecker product
+matrix_t kroneckerProduct(const matrix_t& A, const matrix_t& B) {
+    // ChatGPT generated
+    matrix_t result(A.rows() * B.rows(), A.cols() * B.cols());
+
+    for (int i = 0; i < A.rows(); ++i) {
+        for (int j = 0; j < A.cols(); ++j) {
+            result.block(i * B.rows(), j * B.cols(), B.rows(), B.cols()) = A(i, j) * B;
+        }
+    }
+
+    return result;
+}
+
 matrix_t Bezier::S_matrix(int order) {
   matrix_t S;
   S.resize(order,order+1);
@@ -28,6 +42,56 @@ matrix_t Bezier::H_matrix(int order) {
   matrix_t H_matrix(order+1, order+1);
   H_matrix = (1./tau)*S.transpose()*R.transpose();
   return H_matrix;
+}
+
+matrix_t Bezier::K_matrix(int m, int n) {
+    // ChatGPT generated
+    int mn = m * n;
+    matrix_t Y = matrix_t::Identity(mn, mn);
+
+    // Generate the permutation indices
+    Eigen::VectorXi I(mn);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            I(i * n + j) = j * m + i;
+        }
+    }
+
+    // Apply the permutation to the rows of the identity matrix
+    matrix_t permuted_Y(mn, mn);
+    for (int i = 0; i < mn; ++i) {
+        permuted_Y.row(i) = Y.row(I(i));
+    }
+
+    return permuted_Y;
+}
+
+matrix_t Bezier::H_vec(matrix_t H, int m, int order, int gamma, int power_of_H) {
+    // ChatGPT generated
+    matrix_t K_mat = K_matrix(order + 1, power_of_H + 1);
+
+    // Initialize H_tmp as an empty matrix
+    matrix_t H_tmp(m * H.cols() * (power_of_H + 1), m * H.rows());
+    H_tmp.setZero();
+
+    int row_offset = 0;
+    for (int i = 0; i <= power_of_H; ++i) {
+        matrix_t H_transformed = H.transpose().pow(i);
+        matrix_t kron_prod = kroneckerProduct(H_transformed, matrix_t::Identity(m, m));
+        H_tmp.block(row_offset, 0, kron_prod.rows(), kron_prod.cols()) = kron_prod;
+        row_offset += kron_prod.rows();
+    }
+
+    // Compute the final H_vec_
+    matrix_t H_vec_ = kroneckerProduct(K_mat, matrix_t::Identity(m, m)) * H_tmp;
+
+    return H_vec_;
+}
+
+matrix_t Bezier::inv_DT_vec(int m, int order, int gamma) {
+     matrix_t D = D_matrix(order, gamma);
+     matrix_t kron_prod = kroneckerProduct(D.inverse().transpose(), matrix_t::Identity(m, m));
+     return kron_prod;
 }
 
 matrix_t Bezier::R_n(int order1, int order2) {
@@ -133,9 +197,9 @@ matrix_t Bezier::db(vector_t t, int p, matrix_t xi) {
   return T(t)*M*Hpow(p).transpose()*xi;
 }
 
-matrix_t Bezier::F(matrix_t A, vector_t b) {
-  
-}
+// matrix_t Bezier::F(matrix_t A, vector_t b) {
+//   
+// }
 
 void Bezier::mix_constraints(Eigen::Ref<matrix_t> A_mix, Eigen::Ref<vector_t> b_mix, vector_t c, vector_t x_bar, vector_t f_xbar) {
 int n = 2;
@@ -199,15 +263,17 @@ void Bezier::input_constraints(Eigen::Ref<matrix_t> A_u, Eigen::Ref<vector_t> b_
 
 }
 
-void Bezier::vert2hyp(vector_t V, Eigen::Ref<matrix_t> A, Eigen::Ref<matrix_t> b) {
- Eigen::Polyhedron poly; 
-}
 
-matrix_t Bezier::hyp2vert(matrix_t A, matrix_t b) {
-  Eigen::Polyhedron poly;
-  bool success = poly.setHrep(A, b);
-  auto vrep = poly.vrep();
-  matrix_t V;
-  V = vrep.first;
-  return V;
-}
+
+// void Bezier::vert2hyp(vector_t V, Eigen::Ref<matrix_t> A, Eigen::Ref<matrix_t> b) {
+//  Eigen::Polyhedron poly; 
+// }
+// 
+// matrix_t Bezier::hyp2vert(matrix_t A, matrix_t b) {
+//   Eigen::Polyhedron poly;
+//   bool success = poly.setHrep(A, b);
+//   auto vrep = poly.vrep();
+//   matrix_t V;
+//   V = vrep.first;
+//   return V;
+// }

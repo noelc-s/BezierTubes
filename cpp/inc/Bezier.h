@@ -7,7 +7,6 @@
 // #include "Polyhedron.h"
 //#include "setoper.h"
 // #include "cdd.h"
-#include "Polyhedron.h"
 
 using namespace bezier;
 
@@ -31,6 +30,9 @@ class Bezier {
         D(D_matrix(order, gamma)), M(M_matrix(order)){ }
 
     matrix_t H_matrix(int order);
+    matrix_t K_matrix(int m, int n);
+    matrix_t H_vec(matrix_t H, int m, int order, int gamma, int power_of_H);
+    matrix_t inv_DT_vec(int m, int order, int gamma);
     matrix_t M_matrix(int order);
     matrix_t S_matrix(int order);
     matrix_t R_matrix(int order);
@@ -47,15 +49,15 @@ class Bezier {
     matrix_t B(scalar_t t, matrix_t xi);
     matrix_t B(vector_t t, matrix_t xi);
 
-    matrix_t F(matrix_t A, vector_t b);
+    // matrix_t F(matrix_t A, vector_t b);
     matrix_t B(matrix_t A, vector_t b);
 
     void mix_constraints(Eigen::Ref<matrix_t> A_mix, Eigen::Ref<vector_t> b_mix, vector_t c, vector_t x_bar, vector_t f_xbar);
     void input_constraints(Eigen::Ref<matrix_t> A_u, Eigen::Ref<vector_t> b_u, vector_t c, vector_t x_bar, vector_t f_xbar);
     void Pi_SD(matrix_t &A);
 
-    void vert2hyp(vector_t V, Eigen::Ref<matrix_t> A, Eigen::Ref<matrix_t> b);
-    matrix_t hyp2vert(matrix_t A, matrix_t b);
+    // void vert2hyp(vector_t V, Eigen::Ref<matrix_t> A, Eigen::Ref<matrix_t> b);
+    // matrix_t hyp2vert(matrix_t A, matrix_t b);
 
 
   private:

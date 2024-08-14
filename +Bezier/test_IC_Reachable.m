@@ -74,8 +74,8 @@ D_vec = Delta_vec*H_vec;
 for tau = 0:0.02:20*pi
 
 % X0 = [0; 0]; 
-X0 = [pi; sin(tau)]; 
-% X0 = [cos(tau); sin(tau)]; 
+% X0 = [pi; sin(tau)]; 
+X0 = [cos(tau); sin(tau)]; 
     
 % Forward
 % Dynamic bias
