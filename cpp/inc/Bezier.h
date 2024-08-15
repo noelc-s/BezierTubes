@@ -31,7 +31,15 @@ class Bezier {
 
     matrix_t H_matrix(int order);
     matrix_t K_matrix(int m, int n);
-    matrix_t H_vec(matrix_t H, int m, int order, int gamma, int power_of_H);
+    matrix_t Proj_PSD(const matrix_t& M);
+    matrix_t Pi(const vector_t& c, int m, int gamma);
+    matrix_t H_vec(const matrix_t &H, const int m, int order, const int gamma, const int power_of_H);
+    void M_N_Gamma(const double Lg, const double Lf, const vector_t g_xbar, const double e_bar, const vector_t K, const double u_max,
+                matrix_t &M, vector_t &N, scalar_t &Gamma, vector_t &c, matrix_t &M_og);
+    void F_G(const matrix_t& Ax, const vector_t& bx, const matrix_t& H, const int m, const matrix_t& xbar, 
+                const matrix_t& f_xbar, const matrix_t& g_xbar, const int gamma, const std::vector<matrix_t>& Q, 
+                const double Lg, const double Lf, const double e_bar, const vector_t K, const double u_max,
+                matrix_t &F, matrix_t &G);
     matrix_t inv_DT_vec(int m, int order, int gamma);
     matrix_t M_matrix(int order);
     matrix_t S_matrix(int order);
