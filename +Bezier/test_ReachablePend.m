@@ -10,7 +10,7 @@ dt = .5;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [2;2;2;2];
 
-steps = 5;
+steps = 1;
 
 m = 1;
 l = 1;
@@ -39,7 +39,7 @@ gamma = 2;
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order,dt);
 D_nT = inv(D);
-Pi = Bezier.Pi(c,2,1);
+% Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(order, dt);
 
 xbar = repmat(xbar,1,steps);
