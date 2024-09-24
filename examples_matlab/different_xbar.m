@@ -6,7 +6,7 @@
 
 % Parameters
 u_max = 5;
-horizon_N = 5;
+horizon_N = 7;
 dt = .5;
 A_x = [0 1; 0 -1; 1 0; -1 0];
 b_x = 2*[1; 1; 1; 1];
@@ -30,7 +30,7 @@ Df_func = matlabFunction(Df_model,'Vars',x_sym);
 Dg_func = matlabFunction(Dg_model,'Vars',x_sym);
 
 % Reference point
-x0 = [0; 2];
+x0 = [0;1];
 
 xbar = x0;
 f_xbar = f(xbar');
@@ -42,8 +42,11 @@ Lf = 1;
 Lg = 1;
 e_bar = 0;
 K = [-1 -1];
-[M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
-clf
+Q = Bezier.Q(horizon_N, 3);
+H = Bezier.H(3, horizon_N*dt);
+Delta_vec = Bezier.Delta_vec(m, order, gamma);
+H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
+D_vec = Delta_vec*H_vec;
 
 clf
 hold on;
@@ -58,14 +61,6 @@ axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-1 b_x(3)+1]);
 
 
 %% 1 step B-spline reachable over dt, different x_bar
-% Bezier Matrices for N*dt
-H = Bezier.H(3, horizon_N*dt);
-D = Bezier.D(2,3,horizon_N*dt);
-D_nT = inv(D');
-Pi = Bezier.Pi(c,2,1);
-Z = Bezier.Z(3, horizon_N*dt);
-
-X0 = [0; 1];  
     
 x1 = X0;
 x_bar = [];
@@ -80,18 +75,16 @@ for i = 1:horizon_N
     x_bar = [x_bar x1];
 end
 x_barf = x_bar;
-xbar = x_bar;
 f_xbar = f(x_bar')';
 g_xbar = g(x_bar')';
-Q = Bezier.Q(horizon_N, 3);
-% tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
-A = A_in;
-b = b_in;
-Vert_f = cddmex('extreme',struct('A',[D(1:2,:); A],'B',[X0;b],'lin',1:2));
-Vert_f = Vert_f.V*D(3:4,:)';
-ind = convhull(Vert_f);
-Vert_f = Vert_f(ind,:);
+[A, b] = Bezier.F_G(A_x, b_x, H,m, x_barf, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+% Forward
+Vert_f = cddmex('extreme',struct('A',[D_vec(1:2,:); A],'B',[X0;b],'lin',1:2));
+Vert_f = Bezier.Poly.conv((D_vec(3:4,:)*Vert_f.V')');
+if ~isempty(Vert_f)
+    ind = convhull(Vert_f);
+    Vert_f = Vert_f(ind,:);
+end
 patch(Vert_f(:,1),Vert_f(:,2),[0 1 0],'facealpha',0.03,'edgecolor',[0.1 0.7 0.1],'linewidth',2);
 scatter(x_bar(1,:),x_bar(2,:),50,[0.1 0.7 0.1],'filled');
 
@@ -109,67 +102,48 @@ for i = 1:horizon_N
     x_bar = [x1 x_bar ];
 end
 x_barb = x_bar;
-xbar = x_bar;
 f_xbar = f(x_bar')';
 g_xbar = g(x_bar')';
-Q = Bezier.Q(horizon_N, 3);
 % tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
-A = A_in;
-b = b_in;
-Vert_b = cddmex('extreme',struct('A',[D(3:4,:); A],'B',[X0;b],'lin',1:2));
-Vert_b = Vert_b.V*D(1:2,:)';
-ind = convhull(Vert_b);
-Vert_b = Vert_b(ind,:);
+[A, b] = Bezier.F_G(A_x, b_x, H, m, x_barb, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+% Backward
+Vert_b = cddmex('extreme',struct('A',[D_vec(3:4,:); A],'B',[X0;b],'lin',1:2));
+Vert_b = Bezier.Poly.conv((D_vec(1:2,:)*Vert_b.V')');
+if ~isempty(Vert_b)
+    ind = convhull(Vert_b);
+    Vert_b = Vert_b(ind,:);
+end
 patch(Vert_b(:,1),Vert_b(:,2),[0 0 1],'facealpha',0.03,'edgecolor',[0.1 0.1 0.7],'linewidth',2);
 scatter(x_bar(1,:),x_bar(2,:),50,[0.1 0.1 0.7],'filled');
 
-for tau = 0:0.02:20*pi
+%%
 
-X0 = [0; 1];  
+X1_f = x_barf(:,end);  
+X1_b = x_barb(:,1);  
     
 % Forward
-% Dynamic bias
-x1 = X0;
-
-x_bar = [linspace(X0(1), X0(1)+cos(tau),horizon_N);...
-        linspace(X0(2), X0(2)+sin(tau),horizon_N)];
+% kinematic bias
+x_bar = [linspace(X0(1), X1_f(1),horizon_N);...
+        linspace(X0(2), X1_f(2),horizon_N)];
 x_barf = x_bar;
-
-xbar = x_bar;
 f_xbar = f(x_bar')';
 g_xbar = g(x_bar')';
-
-Q = Bezier.Q(horizon_N, 3);
-% tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
-A = A_in;
-b = b_in;
-
-
-Vert_f = cddmex('extreme',struct('A',[D(1:2,:); A],'B',[X0;b],'lin',1:2));
-Vert_f = Vert_f.V*D(3:4,:)';
-% toc
+[A, b] = Bezier.F_G(A_x, b_x, H, m, x_barf, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+Vert_f = cddmex('extreme',struct('A',[D_vec(1:2,:); A],'B',[X0;b],'lin',1:2));
+Vert_f = Bezier.Poly.conv((D_vec(3:4,:)*Vert_f.V')');
 
 % Backward
-% Dynamic bias
+% kinematic bias
 x1 = X0;
-x_bar = [linspace(X0(1)-cos(tau),X0(1),horizon_N);...
-        linspace(X0(2)-sin(tau),X0(2),horizon_N)];
+x_bar = [linspace(X1_b(1),X0(1),horizon_N);...
+        linspace(X1_b(2),X0(2),horizon_N)];
 x_barb = x_bar;
-
-xbar = x_bar;
 f_xbar = f(x_bar')';
 g_xbar = g(x_bar')';
-
-Q = Bezier.Q(horizon_N, 3);
-% tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
-A = A_in;
-b = b_in;
-
-Vert_b = cddmex('extreme',struct('A',[D(3:4,:); A],'B',[X0;b],'lin',1:2));
-Vert_b = Vert_b.V*D(1:2,:)';
+[A, b] = Bezier.F_G(A_x, b_x, H, m, x_barb, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+% Backward
+Vert_b = cddmex('extreme',struct('A',[D_vec(3:4,:); A],'B',[X0;b],'lin',1:2));
+Vert_b = Bezier.Poly.conv((D_vec(1:2,:)*Vert_b.V')');
 
 if size(Vert_b,1)>2
     ind = convhull(Vert_b);
@@ -179,20 +153,10 @@ if size(Vert_f,1)>2
     ind = convhull(Vert_f);
     Vert_f = Vert_f(ind,:);
 end
-% patch(Vert(:,1),Vert(:,2),color,'facealpha',0.1);
-% Vert2 = Vert;
 
+patch(Vert_f(:,1),Vert_f(:,2),[0 1 0],'facealpha',0.03,'edgecolor',[0.1 0.7 0.1],'linewidth',2);
+scatter(x_barf(1,:),x_barf(2,:),50,[0.1 0.7 0.1],'filled');
+patch(Vert_b(:,1),Vert_b(:,2),[0 0 1],'facealpha',0.03,'edgecolor',[0.1 0.1 0.7],'linewidth',2);
+scatter(x_barb(1,:),x_barb(2,:),50,[0.1 0.1 0.7],'filled');
 
-%% Plot results
-p_f.Vertices = Vert_f;
-p_f.Faces = 1:size(Vert_f,1);
-p_b.Vertices = Vert_b;
-p_b.Faces = 1:size(Vert_b,1);
-xb_f.XData = x_barf(1,:);
-xb_f.YData = x_barf(2,:);
-xb_b.XData = x_barb(1,:);
-xb_b.YData = x_barb(2,:);
-x0_plot.XData = X0(1);
-x0_plot.YData = X0(2);
-drawnow
-end
+axis equal

@@ -5,8 +5,8 @@
 % - 1 step reachable with N step B-spline over N*dt
 
 % Parameters
-u_max = 1;
-horizon_N = 10;
+u_max = 10;
+horizon_N = 5;
 dt = 1;
 A_x = [0 1; 0 -1; 1 0; -1 0];
 b_x = 6*[1; 1; 1; 1];

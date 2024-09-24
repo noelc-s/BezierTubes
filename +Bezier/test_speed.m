@@ -5,7 +5,7 @@
 % state and input constraint satisfaction.
 
 % Parameters
-u_max = 10;
+u_max = 1;
 dt = 1;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [0.3; 0.3; 0.6; 0.6];
@@ -21,16 +21,8 @@ f = @(x) -gf/l*sin(x(1,:));
 g = @(x) 1/(m*l^2)+0*x(1,:);
 Lf = 1;
 Lg = 1; % this is LG_inverse
-
+e_bar = 0;
 K = [-1 -1];
-
-A_cl = [0 1; K];
-P = lyap(A_cl',eye(2));
-beta = 4*max(eig(P))^3/1^2;
-w_overline = .01;
-state_buffer = b_x - sqrt(beta*w_overline^2)*sqrt(diag(A_x*inv(P)*A_x'));
-e_bar = sqrt(beta*w_overline^2/min(eig(P)));
-
 % Reference point 
 x0 = [0; 0];
 xbar = [0; 0];
@@ -42,6 +34,7 @@ g_xbar = 1./g(xbar); % This is g_inverse
 [M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
 
 % Bezier Matrices
+m=2;
 order = 3;
 gamma = 2;
 H = Bezier.H(order, dt);
@@ -56,7 +49,7 @@ g_xbar = repmat(g_xbar,1,steps);
 
 %% Constraint Calculation
 
-[F, G] = Bezier.F_G(A_x, state_buffer, H, m, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
+[F, G] = Bezier.F_G(A_x, b_x, H, m, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
 
 clf
 IC = x0;
@@ -130,5 +123,6 @@ for i = 1:size(Vert,1)-1
     end
 end
 end
+
 
 

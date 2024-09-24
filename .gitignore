@@ -1,5 +1,5 @@
 build/
 *.swp
+*.png
 *.asv
 figures/*
-*.*
