@@ -1,20 +1,5 @@
-function [F, G] = F_G(Ax, bx, H, m, xbar, f_xbar, g_xbar, gamma, varargin)
-
+function [F, G] = F_G(Ax, bx, H, m, xbar, f_xbar, g_xbar, gamma, Q, Lg, Lf, e_bar, K, u_max)
 order = size(H,1);
-
-use_Q = false;
-
-if ~isempty(varargin)
-    Q = varargin{1};
-    Lg = varargin{2};
-    Lf = varargin{3};
-    e_bar = varargin{4};
-    K = varargin{5};
-    u_max = varargin{6};
-%     use_Q = true;
-else
-    Q = {eye(order)};
-end
 
 F = [];
 G = [];

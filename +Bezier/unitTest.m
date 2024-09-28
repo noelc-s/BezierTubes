@@ -6,7 +6,7 @@ order = 2*gamma-1; % minimal curve
 m = 1;
 
 x0 = [0; 0];
-x1 = [1; 1];
+x1 = [.45; .7];
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order, dt);
 X = [x0 x1];
@@ -14,7 +14,7 @@ p = X(:)'/D;
 P = [p; p*H];
 
 figure(1)
-scatter(P(1,:),P(2,:))
+scatter(P(1,:),P(2,:),'filled')
 Z = Bezier.Z(order, dt);
 tau = linspace(0,1);
 B = P*Z(tau);
@@ -26,7 +26,7 @@ H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
 assert(all(vec(P) == H_vec*vec(p)))
 
 %% Refine
-for r = 3:10
+for r = 3:4
 P_prime = (P*Bezier.R_n(3,r));
 Z = Bezier.Z(r, dt);
 
@@ -46,7 +46,7 @@ order = 2*gamma-1; % minimal curve
 % P = (Bezier.R_n(order_og,order,dt)'*P')';
 % Z = Bezier.Z(order, dt);
 
-segments =  10;
+segments =  2;
 
 Q = Bezier.Q(segments, order);
 for i = 1:segments
