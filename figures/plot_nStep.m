@@ -1,7 +1,7 @@
 %% Description
 
 % Parameters
-u_max = 3;
+u_max = 5;
 dt = 0.2;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [1;1;1;1];

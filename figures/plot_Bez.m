@@ -1,10 +1,10 @@
 %% Description
 
 % Parameters
-u_max = 3;
+u_max = 5;
 dt = 1;
 A_x = [1 0; -1 0; 0 1; 0 -1];
-b_x = [1;1;1;1];
+b_x = 2*[1;1;1;1];
 
 steps = 1;
 
@@ -68,7 +68,7 @@ axis off
 hold on;
 patch([b_x(2) b_x(1) -b_x(2) -b_x(1)],[b_x(4) -b_x(3) -b_x(4) b_x(3)],'k','facealpha',0.1)
 axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-0.1 b_x(3)+0.1]);
-U_MAX = linspace(10,.1,10);
+U_MAX = linspace(20,.1,10);
 
 c1 = [0 1 0];
 c2 = [0 0 1];
@@ -121,6 +121,9 @@ for j = 1:length(DT)
 end
 
 %% Initial condition
+
+% this only uses IC as ref pt.
+
 subaxis(3,3,7, 'Spacing', 0.03, 'Padding', 0, 'Margin', 0);
 axis off
 hold on;

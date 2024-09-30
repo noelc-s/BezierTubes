@@ -3,6 +3,7 @@ function [Pi_1, Pi_2, delta] = A_to_Pi(g_xbar, A, b, system, H, x_bar, f_xbar)
 Lf = system.L.Lf;
 Lg = system.L.Lg;
 m = system.m;
+n = system.n;
 gamma = system.gamma;
 
 P1 = [];
@@ -12,9 +13,9 @@ for i = 1:size(A,1)
     a_ = A(i,:);
     b_ = b(i);
     
-    [M, N] = M_N(Lf, Lg, g_xbar, a_);
+    [M, N] = M_N(Lf, Lg, g_xbar, a_(end-1:end));
     
-    a = [a_ 0]';
+%     a = [a_ 0]';
     A1 = [eye(system.n) zeros(system.n,system.m)];
     A2 = [zeros(system.m,system.n) eye(system.m)];
     b1 = x_bar;
@@ -22,11 +23,13 @@ for i = 1:size(A,1)
     M_proj = Bezier.Proj_PSD(M);
     
     h = @(x) [norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')]'*M_proj*[norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')]...
-        + N'*[norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')]+a'*x;
-    ell = @(x) [norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')]'*M_proj*[norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')]...
-        + N'*[norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')];
+        + N'*[norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')]+[a_(1:n) zeros(1,m)]*x;
     
-    delta(i) = getDeltaLevelSet(M_proj, N, a, b_, system.n, A1, A2, b1, b2, x_bar, f_xbar, h, ell);
+    c = MN_to_c(M, N, b_)';
+    
+    ell = @(x) c*[norm(A1*x-b1,'inf'); norm(A2*x-b2,'inf')] + [a_(1:n) zeros(1,m)]*x;
+    
+    delta(i) = getDeltaLevelSet(M_proj, N, a_(1:n)', b_, system.n, A1, A2, b1, b2, x_bar, f_xbar, h, ell);
     c = MN_to_c(M, N, delta(i));
     [Pi_1, Pi_2] = c_to_Pi(c, m, gamma);
     P1 = [P1; Pi_1];
@@ -46,7 +49,7 @@ end
 
 function c = MN_to_c(M, N, delta)
 if all((all(M==zeros(2))))
-    c = [0 0];
+    c = [0; 0];
     return
 end
 M = Bezier.Proj_PSD(M);
@@ -115,7 +118,8 @@ for mat = 1:size(A, 2)
         end
         
         if i==j
-            pt = null(A_mat) + 2*center;
+            % todo: what happens here
+            pt = A_mat(1,:)' + 2*center;
         else
             if all((b_mat(i) - sn*b_mat(j)+(A_mat(i,:) - sn*A_mat(j,:))*center)==0)
                 pt = pinv(A_mat(i,:) - sn*A_mat(j,:));
@@ -135,8 +139,8 @@ for mat = 1:size(A, 2)
                 s2_l = perm(p,2)*(A2(k,:)*(v-z));
                 s2_c = perm(p,2)*(A2(k,:)*z-b2(k));
                 a_ = [s1_l; s2_l]'*M_proj*[s1_l; s2_l];
-                b_ = 2*[s1_l; s2_l]'*M_proj*[s1_c; s2_c]+N'*[s1_l; s2_l] + a'*(v-z);
-                c_ = [s1_c; s2_c]'*M_proj*[s1_c; s2_c]+N'*[s1_c; s2_c] + a'*z-b_level_set;
+                b_ = 2*[s1_l; s2_l]'*M_proj*[s1_c; s2_c]+N'*[s1_l; s2_l] + a'*(v(1:n)-z(1:n));
+                c_ = [s1_c; s2_c]'*M_proj*[s1_c; s2_c]+N'*[s1_c; s2_c] + a'*z(1:n)-b_level_set;
                 l = (-b_+sqrt(b_^2-4*a_*c_))/(2*a_);
                 lam = [lam; l];
                 l = (-b_-sqrt(b_^2-4*a_*c_))/(2*a_);
@@ -145,16 +149,19 @@ for mat = 1:size(A, 2)
         end
         for l = 1:size(lam)
             pt = z+lam(l)*(v-z);
-            if abs(h(pt)-b_level_set) < 1e-2
+            if abs(h(pt)-b_level_set) < 1e-3
                 vertices = [vertices pt];
-                scatter(pt(1),pt(2),100,'filled')
+%                 scatter(pt(1),pt(2),100,'filled')
             end
         end
     end
 end
 level = [];
 for i = 1:size(vertices,2)
-    level(i) = ell(vertices(:,i));
+    val = ell(vertices(:,i));
+    if val > 0
+        level = [level val];
+    end
 end
 delta = min(level);
 end

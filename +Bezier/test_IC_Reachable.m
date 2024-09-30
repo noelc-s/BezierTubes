@@ -5,7 +5,7 @@
 % - 1 step reachable with N step B-spline over N*dt
 
 % Parameters
-u_max = 10;
+u_max = 50;
 horizon_N = 5;
 dt = 1;
 A_x = [0 1; 0 -1; 1 0; -1 0];
@@ -45,7 +45,7 @@ Lf = 1;
 Lg = 1;
 e_bar = 0;
 K = [-1 -1];
-[M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+% [M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
 clf
 
 clf
@@ -65,7 +65,7 @@ axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-1 b_x(3)+1]);
 H = Bezier.H(3, dt);
 D = Bezier.D(2,3,dt);
 D_nT = inv(D');
-Pi = Bezier.Pi(c,2,1);
+% Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(3, dt);
 Delta_vec = Bezier.Delta_vec(m, order, gamma);
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);

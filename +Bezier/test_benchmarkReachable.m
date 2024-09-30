@@ -6,11 +6,11 @@
 clear;clc;
 
 % Parameters
-u_max =1;
-horizon_N = 4;
-dt = .25;
+u_max =5;
+horizon_N = 10;
+dt = 1.0/horizon_N;
 A_x = [1 0; -1 0; 0 1; 0 -1];
-b_x = [0.3; 0.3; 0.3; 0.3];
+b_x = [1;1;1;1];
 
 % Dynamics
 f = @(x) -sin(x(:,2));
@@ -126,13 +126,14 @@ Delta_vec = Bezier.Delta_vec(m, order, gamma);
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
 D_vec = Delta_vec*H_vec;
 
+Q = Bezier.Q(1, 3);
 
 Vert_ = X0';
 
 xbar = X0;
 f_xbar = f(xbar');
 g_xbar = g(xbar');
-[M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+% [M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
 
 for k = 1:horizon_N
     Vert_tmp = [];
@@ -181,9 +182,9 @@ for k = 1:horizon_N
         xbar = IC;
         f_xbar = f(xbar');
         g_xbar = g(xbar');
-        [M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+%         [M, N, Gamma, c] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
         
-        [F, G] = Bezier.F_G(A_x, b_x, H, m, xbar, f_xbar, g_xbar, gamma,{eye(4)},Lg,Lf,e_bar,K,u_max);
+        [F, G] = Bezier.F_G(A_x, b_x, H, m, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
         A = F;
         b = G;
         
@@ -234,12 +235,12 @@ patch([b_x(2) b_x(1) -b_x(2) -b_x(1)],[b_x(4) -b_x(3) -b_x(4) b_x(3)],'k','facea
 axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-.1 b_x(3)+.1]);
 patch(Vert1(:,1),Vert1(:,2),[1 0 0],'facealpha',0.03,'edgecolor',[0.7 0.1 0.1],'linewidth',2);
 patch(Vert2(:,1),Vert2(:,2),[0 1 0],'facealpha',0.03,'edgecolor',[0.1 0.7 0.1],'linewidth',2);
-patch(Vert3(:,1),Vert3(:,2),[0 0 0],'facealpha',0.03,'edgecolor',[0 0 0],'linewidth',2);
-patch(Vert4(:,1),Vert4(:,2),[0 0 1],'facealpha',0.03,'edgecolor',[0.1 0.1 0.7],'linewidth',2);
+% patch(Vert3(:,1),Vert3(:,2),[0 0 0],'facealpha',0.03,'edgecolor',[0 0 0],'linewidth',2);
+% patch(Vert4(:,1),Vert4(:,2),[0 0 1],'facealpha',0.03,'edgecolor',[0.1 0.1 0.7],'linewidth',2);
 legend({'','','1 step reachable over N*dt', ...
-    '1 step B-spline reachable over dt, different x_bar',...
-    'N step reachable over dt, same x_bar', ...
-    'N step reachable over dt, different x_bar'}, ...
+    '1 step B-spline reachable over dt, different xbar',...
+    'N step reachable over dt, same xbar', ...
+    'N step reachable over dt, different xbar'}, ...
     'interpreter','latex','fontsize',15)
 set(gca,'TickLabelInterpreter', 'latex');
 set(gca,'FontSize',17)

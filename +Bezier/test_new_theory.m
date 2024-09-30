@@ -1,10 +1,10 @@
 % Parameters
-u_max = 10;
+u_max = 20;
 horizon_N = 1;
 steps = 1;
-dt = 1;
+dt = 2.1; % 2 is bad????????
 A_x = [1 0; -1 0; 0 1; 0 -1];
-b_x = [1; 1;1;1];
+b_x = [.3; .3;.3;.3];
 
 % Dynamics
 f = @(x) -sin(x(:,2));
@@ -32,15 +32,15 @@ k_bar = 0;
 X0 = x0;
 XBAR = xbar;
 
-e_0 = 0.05;
+e_0 = 0.0;
 
 system.L.L_k = 1;
-system.L.L_e = 0.0;
+system.L.L_e = 0.00001;
 system.L.L_psi = 1;
 system.L.L_pi = 1;
 system.L.Lf = 1;
-system.L.Lg = .0001;
-% system.L.Lg = 1;
+% system.L.Lg = .0001;
+system.L.Lg = 1;
 system.n = 2;
 system.m = 1;
 system.gamma = 2;
@@ -73,11 +73,11 @@ C_add = kron(A_x,ones(4*gamma*m*m,1));
 Pi_input_constraints = [Pi_u_1 Pi_u_2];
 Pi_state_constraints = [Pi_x_1 Pi_x_2];
 Pi = [Pi_u_1 Pi_u_2; Pi_x_1+C_add Pi_x_2;];
-h = [kron(bu,ones(4*gamma*m*m,1)) + Pi_input_constraints*[xbar(:,j); f_xbar(:,j)];
-    kron(bx,ones(4*gamma*m*m,1)) + Pi_state_constraints*[xbar(:,j); f_xbar(:,j)]];
+% h = [kron(bu,ones(4*gamma*m*m,1)) + Pi_input_constraints*[xbar(:,j); f_xbar(:,j)];
+%     kron(bx,ones(4*gamma*m*m,1)) + Pi_state_constraints*[xbar(:,j); f_xbar(:,j)]];
 % Pi = [Pi_u_1 Pi_u_2; Pi_x_1 Pi_x_2;];
-% h = [kron(delta_u,ones(4*gamma*m*m,1)) + Pi_input_constraints*[xbar(:,j); f_xbar(:,j)];
-%     kron(delta_x,ones(4*gamma*m*m,1)) + Pi_state_constraints*[xbar(:,j); f_xbar(:,j)]];
+h = [kron(delta_u,ones(4*gamma*m*m,1)) + Pi_input_constraints*[xbar(:,j); f_xbar(:,j)];
+    kron(delta_x,ones(4*gamma*m*m,1)) + Pi_state_constraints*[xbar(:,j); f_xbar(:,j)]];
 % inds_where_Pi_is_zero = all(Pi_x_1==0,2);
 % h = [1 + Pi_norm_constraints*[xbar(:,j); f_xbar(:,j)];
 %     [(1-inds_where_Pi_is_zero).*(1-[Pi_x_1 Pi_x_2]*[xbar(:,j); f_xbar(:,j)]);
@@ -98,8 +98,8 @@ A = F;
 b = G;
 
 % Forward
-Vert = cddmex('extreme',struct('A',[D_vec(1:2,:); A],'B',[X0;b],'lin',1:2));
-Vert = Bezier.Poly.conv((D_vec(3:4,:)*Vert.V')');
+Vert = cddmex('extreme',struct('A',[D_vec(3:4,:); A],'B',[X0;b],'lin',1:2));
+Vert = Bezier.Poly.conv((D_vec(1:2,:)*Vert.V')');
 
 if ~isempty(Vert)
     ind = convhull(Vert);
@@ -167,4 +167,5 @@ clf
 %             B(2,k)'+e*Z(tau(k))*Circ(:,2),'k');
 %     end
 %     drawnow
+%     pause()
 % end

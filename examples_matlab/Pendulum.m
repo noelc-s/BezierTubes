@@ -64,15 +64,13 @@ g_xbar = 1./g(xbar'); % This is g_inverse
 
 [Q,Q_combined] = Bezier.Q(horizon_N, 3);
 
-[M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
-
 % Bezier Matrices
 order = 3;
 gamma = 2;
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order,dt);
 D_nT = inv(D);
-Pi = Bezier.Pi(c,2,1);
+% Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(order, dt);
 Delta_vec = Bezier.Delta_vec(m, order, gamma);
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);

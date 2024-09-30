@@ -5,7 +5,7 @@
 % state and input constraint satisfaction.
 
 % Parameters
-u_max = 10;
+u_max = 1;
 dt = 1;
 A_x = [1 0; -1 0; 0 1; 0 -1];
 b_x = [0.3; 0.3; 0.6; 0.6];
@@ -39,7 +39,7 @@ g_xbar = 1./g(xbar); % This is g_inverse
 
 [Q,Q_combined] = Bezier.Q(steps, 3);
 
-[M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+% [M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
 
 % Bezier Matrices
 order = 3;
@@ -47,7 +47,7 @@ gamma = 2;
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order,dt);
 D_nT = inv(D);
-Pi = Bezier.Pi(c,2,1);
+% Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(order, dt);
 
 xbar = repmat(xbar,1,steps);

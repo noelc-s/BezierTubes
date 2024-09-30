@@ -46,12 +46,16 @@ order = 2*gamma-1; % minimal curve
 % P = (Bezier.R_n(order_og,order,dt)'*P')';
 % Z = Bezier.Z(order, dt);
 
-segments =  2;
+segments =  5;
 
 Q = Bezier.Q(segments, order);
 for i = 1:segments
    P_split{i} = P*Q{i}; 
 end
+for i = 1:segments
+   P_split_vec{i} = kron(Q{i}',kron(eye(m),eye(gamma)))*P(:); 
+end
+
 
 figure(1)
 scatter(P(1,:),P(2,:))
@@ -63,6 +67,8 @@ plot(B(:,1),B(:,2))
 
 for j = 1:segments
 scatter(P_split{j}(1,:),P_split{j}(2,:))
+P_vec = reshape(P_split_vec{j},2,[]);
+scatter(P_vec(1,:),P_vec(2,:),'filled')
 Z = Bezier.Z(order, 1);
 tau = linspace(0,1);
 B = P_split{j}*Z(tau);
