@@ -10,7 +10,7 @@
 int main() {
   // Arguments of Bezier are: order of curve (must be at least 3), relative degree of output (2), 
   // and time over which the curve is to be defined
-  scalar_t dt = 0.5;
+  scalar_t dt = 5.0;
   Bezier B = Bezier(3,2,dt);
   // These are the control points. In this example they are a vector:
   vector_t xi(4); // of size (order+1)
@@ -55,7 +55,7 @@ int main() {
   int gamma = 2;
   int m = 1;
   int order = 3;
-  scalar_t Lf = 1;
+  scalar_t Lf = 0;
   scalar_t Lg = 1;
   scalar_t e_bar = 0;
   scalar_t u_max = 5;
@@ -65,7 +65,7 @@ int main() {
         0 ,    1,
         0 ,   -1;
   b_x.resize(4);
-  b_x << 2,2,2,2;
+  b_x << 3,3,3,3;
   H = B.H_matrix(order);
   xbar.resize(2,1);
   xbar << 0,0;

@@ -109,7 +109,7 @@ matrix_t Bezier::Proj_PSD(const matrix_t& M) {
     matrix_t evecs = eigensolver.eigenvectors();
 
     // Initialize the output matrix with small positive values
-    matrix_t M_ = matrix_t::Constant(M.rows(), M.cols(), std::numeric_limits<double>::epsilon());
+    matrix_t M_ = matrix_t::Constant(M.rows(), M.cols(), std::numeric_limits<scalar_t>::epsilon());
 
     // Reconstruct the PSD matrix by adding contributions from positive eigenvalues
     for (int i = 0; i < evals.size(); ++i) {
@@ -121,7 +121,7 @@ matrix_t Bezier::Proj_PSD(const matrix_t& M) {
     return M_;
 }
 
-void Bezier::M_N_Gamma(const double Lg, const double Lf, const vector_t g_xbar, const double e_bar, const vector_t K, const double u_max,
+void Bezier::M_N_Gamma(const scalar_t Lg, const scalar_t Lf, const vector_t g_xbar, const scalar_t e_bar, const vector_t K, const scalar_t u_max,
                   matrix_t &M, vector_t &N, scalar_t &Gamma, vector_t &c, matrix_t &M_og) {
     // ChatGPT
     // Construct M_og
@@ -141,11 +141,11 @@ void Bezier::M_N_Gamma(const double Lg, const double Lf, const vector_t g_xbar, 
     M = Proj_PSD(M_og);
 
     // Compute offset
-    double offset = u_max - Gamma;
+    scalar_t offset = u_max - Gamma;
 
     // Solve quadratic equations for p1 and p2
-    double p1 = (-N(0) + std::sqrt(N(0) * N(0) + 4 * M(0, 0) * offset)) / (2 * M(0, 0));
-    double p2 = (-N(1) + std::sqrt(N(1) * N(1) + 4 * M(1, 1) * offset)) / (2 * M(1, 1));
+    scalar_t p1 = (-N(0) + std::sqrt(N(0) * N(0) + 4 * M(0, 0) * offset)) / (2 * M(0, 0));
+    scalar_t p2 = (-N(1) + std::sqrt(N(1) * N(1) + 4 * M(1, 1) * offset)) / (2 * M(1, 1));
 
     // Compute c based on eigenvalues
     c.resize(2);
@@ -159,7 +159,7 @@ void Bezier::M_N_Gamma(const double Lg, const double Lf, const vector_t g_xbar, 
 
 void Bezier::F_G(const matrix_t& Ax, const vector_t& bx, const matrix_t& H, const int m, const matrix_t& xbar, 
                 const matrix_t& f_xbar, const matrix_t& g_xbar, const int gamma, const std::vector<matrix_t>& Q, 
-                const double Lg, const double Lf, const double e_bar, const vector_t K, const double u_max,
+                const scalar_t Lg, const scalar_t Lf, const scalar_t e_bar, const vector_t K, const scalar_t u_max,
                 matrix_t &F, matrix_t &G) {
     // ChatGPT generated
     int order = H.rows();

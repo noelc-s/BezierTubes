@@ -7,7 +7,7 @@
 % Parameters
 u_max = 5;
 horizon_N = 5;
-dt = .5;
+dt = 0.1;
 A_x = [0 1; 0 -1; 1 0; -1 0];
 b_x = 2*[1; 1; 1; 1];
 
@@ -85,7 +85,7 @@ f_xbar = f(x_bar')';
 g_xbar = g(x_bar')';
 Q = Bezier.Q(horizon_N, 3);
 % tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H, m, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
 A = A_in;
 b = b_in;
 Vert_f = cddmex('extreme',struct('A',[D(1:2,:); A],'B',[X0;b],'lin',1:2));
@@ -114,7 +114,7 @@ f_xbar = f(x_bar')';
 g_xbar = g(x_bar')';
 Q = Bezier.Q(horizon_N, 3);
 % tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H, m,xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
 A = A_in;
 b = b_in;
 Vert_b = cddmex('extreme',struct('A',[D(3:4,:); A],'B',[X0;b],'lin',1:2));
@@ -126,7 +126,8 @@ scatter(x_bar(1,:),x_bar(2,:),50,[0.1 0.1 0.7],'filled');
 
 for tau = 0:0.02:20*pi
 
-X0 = [0; 1];  
+% X0 = [0; 1];  
+X0 = [sin(tau); cos(tau)];
     
 % Forward
 % Dynamic bias
@@ -142,7 +143,7 @@ g_xbar = g(x_bar')';
 
 Q = Bezier.Q(horizon_N, 3);
 % tic
-[A_in, b_in] = Bezier.F_G(A_x, b_x, H, xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
+[A_in, b_in] = Bezier.F_G(A_x, b_x, H,m,  xbar, f_xbar, g_xbar, 2,Q,Lg,Lf,e_bar,K,u_max);
 A = A_in;
 b = b_in;
 
