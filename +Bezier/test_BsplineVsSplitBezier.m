@@ -46,7 +46,7 @@ figure(1)
 scatter(Xi(1,:),Xi(2,:),30,'b','filled')
 Z = Bezier.Z(order, dt);
 tau = linspace(0,dt);
-C = Z(tau)*Xi';
+C = Z(tau)'*Xi';
 hold on;
 plot(C(:,1),C(:,2),'b','linewidth',2)
 XI = Xi;
@@ -63,7 +63,7 @@ figure(1)
 scatter(Xi(1,:),Xi(2,:),30,'filled','b')
 Z = Bezier.Z(order, dt);
 tau = linspace(0,dt);
-C = Z(tau)*Xi';
+C = Z(tau)'*Xi';
 hold on;
 plot(C(:,1),C(:,2),'b','linewidth',2)
 XI = [XI Xi];
@@ -85,17 +85,17 @@ scatter(Xi(1,:),Xi(2,:),30,'filled','r')
 plot(Xi(1,:),Xi(2,:),'r--','linewidth',2)
 Z = Bezier.Z(order, (iter)*dt);
 tau = linspace(0,(iter)*dt);
-C = Z(tau)*Xi';
+C = Z(tau)'*Xi';
 C_fit = C;
 hold on;
 plot(C(:,1),C(:,2),'r','linewidth',2)
 [~,Q] = Bezier.Q(iter, order);
-Xi_prime = (Q*Xi')';
+Xi_prime = (Q'*Xi')';
 r = 2*iter*gamma-1;
 dt_prime = iter*dt;
 Xi_minimal = Xi;
 Z = Bezier.Z(r, dt_prime);
-C = Z(tau)*Xi_prime';
+C = Z(tau)'*Xi_prime';
 % plot(Xi_prime(1,:),Xi_prime(2,:),'r--')
 scatter(Xi_prime(1,:),Xi_prime(2,:),30,'filled','r')
 % plot(C(:,1),C(:,2))

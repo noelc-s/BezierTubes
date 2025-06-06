@@ -21,16 +21,8 @@ f = @(x) -gf/l*sin(x(1,:));
 g = @(x) 1/(m*l^2)+0*x(1,:);
 Lf = 1;
 Lg = 1; % this is LG_inverse
-
+e_bar = 0;
 K = [-1 -1];
-
-A_cl = [0 1; K];
-P = lyap(A_cl',eye(2));
-beta = 4*max(eig(P))^3/1^2;
-w_overline = .01;
-state_buffer = b_x - sqrt(beta*w_overline^2)*sqrt(diag(A_x*inv(P)*A_x'));
-e_bar = sqrt(beta*w_overline^2/min(eig(P)));
-
 % Reference point 
 x0 = [0; 0];
 xbar = [0; 0];
@@ -39,15 +31,16 @@ g_xbar = 1./g(xbar); % This is g_inverse
 
 [Q,Q_combined] = Bezier.Q(steps, 3);
 
-% [M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
+[M, N, Gamma, c, M_og] = Bezier.M_N_Gamma(Lg, Lf, g_xbar, e_bar, K, u_max);
 
 % Bezier Matrices
+m=2;
 order = 3;
 gamma = 2;
 H = Bezier.H(order, dt);
 D = Bezier.D(gamma,order,dt);
 D_nT = inv(D);
-% Pi = Bezier.Pi(c,2,1);
+Pi = Bezier.Pi(c,2,1);
 Z = Bezier.Z(order, dt);
 
 xbar = repmat(xbar,1,steps);
@@ -56,7 +49,7 @@ g_xbar = repmat(g_xbar,1,steps);
 
 %% Constraint Calculation
 
-[F, G] = Bezier.F_G(A_x, state_buffer, H, m, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
+[F, G] = Bezier.F_G(A_x, b_x, H, m, xbar, f_xbar, g_xbar, gamma,Q,Lg,Lf,e_bar,K,u_max);
 
 clf
 IC = x0;
@@ -65,7 +58,6 @@ Delta_vec = Bezier.Delta_vec(m, order, gamma);
 H_vec = Bezier.H_vec(H, m, order, gamma, gamma-1);
 D_vec = Delta_vec*H_vec;
 %% Plot Reachable sets
-set(gcf, 'Color', 'white');
 for r = 1:2
     if r == 1
 %         Forward
@@ -87,24 +79,15 @@ for r = 1:2
         color = 'b';
     end
 
-sgtitle("Max Input = 1, dt = 1")
-subplot(2,2,r)
-xlabel('$\theta$','interpreter','latex')
-ylabel('$\dot{\theta}$','interpreter','latex')
-if r == 1
-    title("Forward")
-else
-    title("Backward")
-end
+subplot(3,2,r)
 hold on;
 patch([b_x(2) b_x(1) -b_x(2) -b_x(1)],[b_x(4) -b_x(3) -b_x(4) b_x(3)],'k','facealpha',0.1)
 axis([-b_x(2)-0.1 b_x(1)+0.1 -b_x(4)-0.1 b_x(3)+0.1]);
 
 patch(Vert(:,1),Vert(:,2),color,'facealpha',0.1);
-set(gca,'TickLabelInterpreter','latex')
-% subplot(3,2,r+2);
-% hold on;
-subplot(2,2,r+2)
+subplot(3,2,r+2);
+hold on;
+subplot(3,2,r+4)
 hold on;
 line([0 dt],[1 1]*u_max)
 line([0 dt],-[1 1]*u_max)
@@ -125,20 +108,21 @@ for i = 1:size(Vert,1)-1
         Xi = [P; P*H];
         q_d_gamma = (P*H^2)* Z(tau);
         
-        subplot(2,2,r)
+        subplot(3,2,r)
         X_D = Xi*Z(tau);
         plot(X_D(1,:),X_D(2,:));
         Xi = Xi*Q_combined;
-        % scatter(Xi(1,:),Xi(2,:))
+        scatter(Xi(1,:),Xi(2,:))
         
-        % subplot(3,2,r+2)
-        % plot(tau, q_d_gamma);
+        subplot(3,2,r+2)
+        plot(tau, q_d_gamma);
         
         U = 1./(g(X_D)).*(-f(X_D) + q_d_gamma);
-        subplot(2,2,r+2)
+        subplot(3,2,r+4)
         plot(tau,U)
     end
 end
 end
+
 
 
