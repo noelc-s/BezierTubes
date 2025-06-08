@@ -40,6 +40,8 @@ clear x1 x2
 Lf = .1;
 Lg = .1;
 
+g_xbar = 1;
+
 M_og = 1/2*[2*Lg*Lf Lg; Lg 0];
 N = [Lf*norm(g_xbar,2); norm(g_xbar,2)];
 M = projectOntoSemidefiniteCone(M_og);
@@ -119,9 +121,9 @@ for i = 1:numel(X)
     for m = 1:4
         I_m = zeros(1,4);
         I_m(m) = 1;
-        Ctrl_m = [I_m*H_0'; I_m*H_1']*D_nT;
+        Ctrl_m = [I_m*H^0'; I_m*H^1']*D_nT;
 
-        A_in = [c_(1)*Ctrl_m; c_(2)*I_m*H_2'*D_nT];
+        A_in = [c_(1)*Ctrl_m; c_(2)*I_m*H^2'*D_nT];
         b_in = [c_(1)*x_bar; -c_(2)*[0 1]*f_xbar];
 
         % forward
